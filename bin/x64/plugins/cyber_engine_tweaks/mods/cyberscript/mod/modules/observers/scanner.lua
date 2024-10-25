@@ -370,7 +370,7 @@ function scannerDetailsGameController_RefreshLayout(thos,wrappedMethod)
 	if(objLook ~= nil) then
 		local entid = objLook:GetEntityID()
 		local entity = getEntityFromManagerById(entid)
-		
+		print(dump(entity))
 		if (entity.id ~= nil) and (getScannerdataFromEntityOrGroupOfEntity(entity) ~= nil) then
 			thos:StopAnimations()
 			

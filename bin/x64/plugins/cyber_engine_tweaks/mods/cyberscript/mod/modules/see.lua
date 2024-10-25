@@ -1883,6 +1883,37 @@ function scriptcheckTrigger(trigger)
 					result = true
 				end
 			end
+
+			if(trigger.name == "tracked_custom_quest") then
+				
+				if currentQuest ~= nil then
+					
+					result= currentQuest.tag == trigger.value
+					
+					
+					
+				end
+			end
+
+			if(trigger.name == "tracked_custom_objective") then
+				
+				if currentQuest ~= nil then
+					
+					
+					for i=1, #currentQuest.objectives do
+						
+						local objective = currentQuest.objectives[i]
+						
+						if(QuestManager.GetObjectiveState(objective.tag).isTracked) then
+
+							result= objective.tag == trigger.value
+
+						end
+					end
+					
+					
+				end
+			end
 			
 
 			if(trigger.name == "completed_native_quest") then
@@ -2208,18 +2239,18 @@ function scriptcheckTrigger(trigger)
 		end
 		
 		
-		if(trigger.output == true) then 
-			
-			----print(trigger.name)
-			----print(dump(trigger))
-			----print(tostring(result))
-			spdlog.error(dump(action))
-		end
+		
 		
 	end
 	
 	if(trigger.expected ~= nil and trigger.name ~= "compare") then result = result == trigger.expected end
-	
+	if(trigger.output == true) then 
+			
+		----print(trigger.name)
+		----print(dump(trigger))
+		----print(tostring(result))
+		logme(1,dump(trigger).." || result : "..tostring(result),true)
+	end
 	return result
 end
 

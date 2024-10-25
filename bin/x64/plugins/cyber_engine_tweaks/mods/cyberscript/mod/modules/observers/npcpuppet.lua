@@ -182,21 +182,29 @@ function NPCPuppet_CompileScannerChunksBefore(thos)
 	--print(Game.NameToString(thos:GetCurrentAppearanceName()))
 	
 	scannedEntity = thos
-		local obj = getEntityFromManagerById(thos:GetEntityID())
+		local obj = getEntityFromManagerById(thos:GetEntityID(),true)
 						
 		
 			if(cyberscript.EntityManager["last_scanned"] == nil) then
-			local entity = {}
-			entity.id = nil
-			entity.tag = "last_scanned"
-			entity.tweak = "None"
-			entity.lock = true
-			cyberscript.EntityManager[entity.tag] = entity
+				local entity = {}
+				entity.id = nil
+				entity.tag = "last_scanned"
+				entity.tweak = "None"
+				entity.lock = true
+				cyberscript.EntityManager[entity.tag] = entity
 			
 			end
+
+			
+
 			cyberscript.EntityManager["last_scanned"].id = nil
 			cyberscript.EntityManager["last_scanned"].tweak = "None"
 			
+			if(obj.id ~= nil) then
+
+				cyberscript.EntityManager["last_scanned"].tag = obj.tag
+
+			end
 			
 		
 			pcall(function ()

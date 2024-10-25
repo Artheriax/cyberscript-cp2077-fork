@@ -376,10 +376,11 @@ if spawnRegion then
 				end
 				
 				local npcSpec =  DynamicEntitySpec.new()
-				if(string.match(chara, ".ent"))then
+				if(chara:sub(-4) == ".ent")then
 					npcSpec.templatePath = chara
 				else
-					npcSpec.recordID = chara
+					npcSpec.recordID = twk
+
 				end
 				npcSpec.appearanceName = appearance or ""
 				npcSpec.position = postp
@@ -388,7 +389,22 @@ if spawnRegion then
 				npcSpec.persistSpawn = persistSpawn or false
 				npcSpec.alwaysSpawned = AlwaysSpawned or false
 				npcSpec.spawnInView =  true
-				
+
+				local textdump = {}
+			if(chara:sub(-4) == ".ent")then
+					textdump.templatePath = chara
+				else
+					textdump.recordID = chara
+				end
+				textdump.appearanceName = appearance or ""
+				textdump.position = postp
+				textdump.orientation = rotation
+				textdump.persistState = persistState or false
+				textdump.persistSpawn = persistSpawn or false
+				textdump.alwaysSpawned = AlwaysSpawned or false
+				textdump.spawnInView =  true
+
+				logme(10,dump(textdump),false)
 				CName.add("CyberScript")
 				CName.add("CyberScript.NPC")
 				CName.add("CyberScript.NPC."..tag)

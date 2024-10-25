@@ -357,7 +357,11 @@ PanzerHUDGameController_OnInitialize(this)
 	end)
 	
 	
+	ObserveAfter('NpcNameplateGameController', 'OnInitialize', function(self)
 	
+	
+		NpcNameplateGameController_OnInitialize(self)
+	   end)
 		
 	ObserveAfter('BrowserController', 'Init', function(self,gameController)
 	

@@ -183,6 +183,15 @@ function ChattersGameController_OnInitialize(self)
 	
 end
 
+function NpcNameplateGameController_OnInitialize(self) 
+	
+	if(observerthread4 == true or moddisabled  == true)   then return end
+	GameController["NpcNameplateGameController"]  = self
+	
+	--logme(2,"Chat Sub Controller Init")
+	
+end
+
 function ChattersGameController_OnPlayerAttach(self,playerGameObject) 
 	
 	if(observerthread4 == true or moddisabled  == true)   then return end

@@ -915,4 +915,16 @@ return {
 		["name"] = "mappin_exist",
 		["tag"] = "mymappin"
 	},
+	["tracked_custom_quest"] = {
+		["helper"] = "This trigger will be triggered when player is tracking an custom quest",
+		["helperTitle"] = "Quest : Custom Quest is tracked",
+		["value"] = "q00_test",
+		["name"] = "tracked_custom_quest"
+	},
+	["tracked_custom_objective"] = {
+		["helper"] = "This trigger will be triggered when player is tracking an custom objective",
+		["helperTitle"] = "Quest : Custom objective is tracked",
+		["value"] = "q00_test_001",
+		["name"] = "tracked_custom_objective"
+	},
 }

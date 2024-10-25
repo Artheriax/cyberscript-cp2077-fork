@@ -86,9 +86,10 @@ function logme(level, msg, force)
             level = level
         }
 
-        print(obj.msg)
+      
 
         if logrecordlevel == nil or (logrecordlevel and level <= logrecordlevel) then
+            print(obj.msg)
             table.insert(logTable, obj)
             spdlog.error(obj.msg)
         end

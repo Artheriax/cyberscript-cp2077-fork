@@ -907,7 +907,8 @@ function checkWithFixer(curPos)
 		checkContext(v.data)
 		
 		if(v.data.name ~= "Delamain")then
-			if(checkPosFixer(curPos,v.data.x,v.data.y,v.data.range))then
+			if(checkPosFixer(curPos,v.data.x,v.data.y,v.data.range) 
+			and (checkTriggerRequirement(v.data.requirement,v.data.trigger))) then
 				ChangeZoneIndicatorSafe()
 				return deepcopy(v.data,nil)
 				
@@ -1699,7 +1700,7 @@ function setNewFixersPoint()
 	
 	
 	for k,v in pairs(cyberscript.cache["fixer"]) do
-		if(mappinManager[cyberscript.cache["fixer"][k].data.tag] == nil and showcyberscriptfixeronmap == true and v.data.exist == false) then
+		if(mappinManager[cyberscript.cache["fixer"][k].data.tag] == nil and showcyberscriptfixeronmap == true and v.data.exist == false and (checkTriggerRequirement(v.data.requirement,v.data.trigger))) then
 			
 			registerMappin(cyberscript.cache["fixer"][k].data.x,cyberscript.cache["fixer"][k].data.y,cyberscript.cache["fixer"][k].data.z,cyberscript.cache["fixer"][k].data.tag,'FixerVariant',true,false,"Fixer",nil,cyberscript.cache["fixer"][k].data.name,cyberscript.cache["fixer"][k].data.name,nil,nil,0)
 	  end
@@ -1735,15 +1736,38 @@ function removeFixersPoint()
 	
 	for k,v in pairs(cyberscript.cache["fixer"]) do
 		if(mappinManager[cyberscript.cache["fixer"][k].data.tag] ~= nil) then
-			deleteMappinByTag(cyberscript.cache["fixer"][k].data.tag)
-			print(cyberscript.cache["fixer"][k].data.tag)
-	  end
+				deleteMappinByTag(cyberscript.cache["fixer"][k].data.tag)
+				print(cyberscript.cache["fixer"][k].data.tag)
+		end
 	end
 		
 		
 end
 	
+function UpdateFixersPoint() 
+	
+	
+	
+	for k,fixer in pairs(cyberscript.cache["fixer"]) do
 
+		if(
+			mappinManager[fixer.data.tag] == nil 
+			and showcyberscriptfixeronmap == true 
+			and fixer.data.exist == false 
+			and (checkTriggerRequirement(fixer.data.requirement,fixer.data.trigger))) then
+			
+			registerMappin(cyberscript.cache["fixer"][k].data.x,cyberscript.cache["fixer"][k].data.y,cyberscript.cache["fixer"][k].data.z,cyberscript.cache["fixer"][k].data.tag,'FixerVariant',true,false,"Fixer",nil,cyberscript.cache["fixer"][k].data.name,cyberscript.cache["fixer"][k].data.name,nil,nil,0)
+	  	end
+
+		if(mappinManager[fixer.data.tag] ~= nil 
+		and (checkTriggerRequirement(fixer.data.requirement,fixer.data.trigger) == false)) then
+			deleteMappinByTag(fixer.data.tag)
+			
+		end
+	end
+		
+		
+end
 
 function ShowMessage(text)
 	if messageController and not isVehicle() then

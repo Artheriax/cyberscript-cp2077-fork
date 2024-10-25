@@ -2042,7 +2042,7 @@ end
 
 function checkFixer()
 	
-	
+	UpdateFixersPoint() 
 	
 	
 	if phonedFixer == false then
@@ -4354,17 +4354,18 @@ end
 function getEntityFromManagerById(Id, avoid)
 	local obj = {}
 	obj.id = nil
+	local key = nil
 	for k,v in pairs(cyberscript.EntityManager) do
 		
 		local enti = v
 		
-		if( avoid == false or ((avoid == nil or avoid == true) and k ~= "lookatentity" and k ~= "lookatnpc")) then
+		if( avoid == false or ((avoid == nil or avoid == true) and k ~= "lookatentity" and k ~= "lookatnpc" and k ~= "last_scanned")) then
 		
 			if type(enti.id) ~= "number" then
 				
 				if(enti.id ~= nil and Id ~= nil and enti.id.hash == Id.hash) then
 					obj = v
-					
+					key = k
 					
 				end
 				
@@ -4377,8 +4378,9 @@ function getEntityFromManagerById(Id, avoid)
 		
 		
 	end
-	if(obj.id ~= nil and obj.primarytag ~= nil) then
-		obj = cyberscript.EntityManager[obj.primarytag]
+	
+	if(obj.id ~= nil and obj.tag ~= key) then
+		obj = cyberscript.EntityManager[obj.tag]
 	end
 
 	return obj
@@ -4389,6 +4391,7 @@ end
 function getScannerdataFromEntityOrGroupOfEntity(entity)
 	
 	if (ScannerInfoManager[entity.tag] ~= nil) then
+		print(dump(ScannerInfoManager[entity.tag]))
 		return ScannerInfoManager[entity.tag]
 		
 		else

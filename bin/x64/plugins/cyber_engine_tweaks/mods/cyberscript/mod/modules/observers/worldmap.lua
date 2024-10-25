@@ -191,8 +191,8 @@ function WorldMapTooltipController_SetData(self,data,menu)
 					
 					-- self.fixerPanel.widget:GetWidgetByIndex(1):GetWidgetByIndex(2):SetVisible(false)
 					-- self.fixerPanel.widget:GetWidgetByIndex(1):GetWidgetByIndex(3):SetVisible(false)
-					
-					self.fixerPanel.widget:GetWidgetByIndex(1):GetWidgetByIndex(0):SetText("Cyberscript Fixer")
+					local datapack = cyberscript.cache["fixer"][SelectedScriptMappin.tag].datapack
+					self.fixerPanel.widget:GetWidgetByIndex(1):GetWidgetByIndex(0):SetText(datapack.." Fixer")
 					
 					inkTextRef.SetText(self.gigBarCompletedText, "100")
 					inkTextRef.SetText(self.gigBarTotalText, "100")

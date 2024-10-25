@@ -83,9 +83,9 @@ function listenPlayerInput(action)
 	-- end
 	
 	-- if (string.find(tostring(actionName), "AXIS") == nil) then
-	-- logme(1,actionName)
+	logme(1,actionName,true)
 	-- --logme(10,"currentPhoneConversation"..dump(currentPhoneConversation))
-	-- logme(1,actionType)
+	logme(1,actionType,true)
 	-- end
 	
 	local phoneAction = false 
@@ -176,11 +176,10 @@ function listenPlayerInput(action)
 		
 		local inputHitted = false
 		
-		if(isdialogactivehub == false and candisplayInteract == true ) then
-		
+			
 			
 			if(#loadInteract > 0  ) then
-				--print("tnsebdomdokjk")
+				
 				local inputIndex = 0
 				if(actionName == "Choice1") then
 					inputIndex = 1
@@ -198,27 +197,11 @@ function listenPlayerInput(action)
 				local interact = cyberscript.cache["interact"][loadInteract[inputIndex]].data
 				runActionList(interact.action,interact.tag,"interact",false,"player")
 				
-				else
 				
-				
-				if(possibleInteractDisplay[currentPossibleInteractChunkIndex] ~= nil) then
-					for i = 1, #possibleInteractDisplay[currentPossibleInteractChunkIndex] do
-						--	--------print"expected input for "..possibleInteractDisplay[currentPossibleInteractChunkIndex][i].name.." : "..possibleInteractDisplay[currentPossibleInteractChunkIndex][i].input)
-						if(inputIndex == i) then
-							runActionList(possibleInteractDisplay[currentPossibleInteractChunkIndex][i].action,possibleInteractDisplay[currentPossibleInteractChunkIndex][i].tag,"interact",false,"player")
-							if(currentHouse == nil or (currentHouse ~= nil and interactautohide == true)) then
-								currentPossibleInteractChunkIndex = 0
-								
-								createInteraction(false)
-								candisplayInteract = false
-							end
-						end
-					end
-				end
 				
 				
 			end
-		end
+		
 	end
 	
 	
