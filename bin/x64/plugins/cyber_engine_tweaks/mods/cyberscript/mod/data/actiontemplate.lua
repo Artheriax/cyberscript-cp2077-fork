@@ -1990,11 +1990,13 @@ return {
 	},
 	["for_entity_around_you"] = {
 		["range"] = 5,
+		["limit"] = 0,
 		["helper"] = "This action will register each entity founded in the player's view in an determined range and filter. \
  leave filter at [] for take all. \
  The filter will check in the name, display name and appearance of the entity \
  The founded entities will be registred in script manager and added in an group called temp_around_group. \
- Fill the action list will perform theses action to each founded entities.",
+ Fill the action list will perform theses action to each founded entities. \
+ limit 0 means it will take at max 9999 entities",
 		["helperTitle"] = "Entity : For Entity around you",
 		["group"] = "",
 		["name"] = "for_entity_around_you",
@@ -2007,11 +2009,13 @@ return {
 	},
 	["for_enemy_around_you"] = {
 		["range"] = 5,
+		
 		["helper"] = "This action will register each enemies founded in the player's view in an determined range and filter. \
  leave filter at [] for take all. \
  The filter will check in the name, display name and appearance of the entity \
  The founded entities will be registred in script manager and added in an group called temp_around_group. \
- Fill the action list will perform theses action to each founded entities.",
+ Fill the action list will perform theses action to each founded entities.\
+ limit 0 means it will take at max 9999 entities",
 		["helperTitle"] = "Entity : For Enemies around you",
 		["group"] = "",
 		["name"] = "for_enemy_around_you",
@@ -4228,7 +4232,7 @@ return {
 		["helper"] = "This action will change a journal entry to a state. 0 = Undefined, 1 = Inactive, 2 = Active, 3 = Success, 4 =  Failed",
 		["helperTitle"] = "Quest : Change Journal entry to state",
 		["name"] = "change_journal_entry_state_by_hash",
-		["hash"] = -1655870506,
+		["hash"] = "-1655870506",
 		["state"] = 3,
 		["notify"] = true
 

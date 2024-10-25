@@ -4721,7 +4721,9 @@ function executeAction(action,tag,parent,index,source,executortag)
 						currentHelpIndex =currentHelpIndex+1
 						if(currentHelpIndex > #currentHelp.section)then
 							UIPopupsManager.ClosePopup()
+							workerTable[currentHelp.tag] = nil
 							currentHelp = nil
+							
 							currentHelpIndex = 1
 						end
 						UIPopupsManager.ClosePopup()
@@ -4731,6 +4733,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 				if(action.name=="previous_help")then
 					if currentHelp ~= nil then
 						currentHelpIndex =currentHelpIndex-1
+						
 						if(currentHelpIndex < 1)then
 							currentHelpIndex =  1
 						end
@@ -4745,6 +4748,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 					if currentHelp ~= nil then
 						if(currentHelpIndex > #currentHelp.section)then
 							UIPopupsManager.ClosePopup()
+							workerTable[currentHelp.tag] = nil
 							currentHelp = nil
 							currentHelpIndex = 1
 							else
@@ -4759,12 +4763,21 @@ function executeAction(action,tag,parent,index,source,executortag)
 								notificationData.isModal = action.ismodal
 								notificationData.margin = inkMargin.new()
 								notificationData.title = currentHelp.title
+								local section = nil
+								if(currentHelp.section[currentHelpIndex] ~= nil) then
+									section = deepcopy(currentHelp.section[currentHelpIndex])
+								end
+
+								checkContext(section)
 								if(currentHelp.section[currentHelpIndex].message == nil) then
-									notificationData.message = currentHelp.section[currentHelpIndex]
+									
+									notificationData.message = "no data"
+
 									else
-									notificationData.message = currentHelp.section[currentHelpIndex].message
-									if(#currentHelp.section[currentHelpIndex].action > 0) then
-										runActionList(currentHelp.section[currentHelpIndex].action, currentHelp.tag.."_"..currentHelpIndex, tag,source,false,executortag)
+									
+									notificationData.message = section.message
+									if(#section.action > 0) then
+										runActionList(section.action, currentHelp.tag.."_"..currentHelpIndex, tag,source,false,executortag)
 									end
 								end
 								notificationData.imageId = nil
@@ -5427,7 +5440,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 						notify = JournalNotifyOption.Notify
 					end
 
-					Game.GetJournalManager():ChangeEntryStateByHash(action.hash, state, notify)
+					Game.GetJournalManager():ChangeEntryStateByHash(tonumber(action.hash), state, notify)
 		
 				end
 
@@ -10107,6 +10120,9 @@ function executeAction(action,tag,parent,index,source,executortag)
 					cyberscript.GroupManager["temp_around_group"].tag = "temp_around_group"
 					cyberscript.GroupManager["temp_around_group"].entities = {}
 					
+					local counter = 0
+					local max  = 9999
+					if(action.limit ~= nil and action.limit ~= 0) then max  = action.limit end
 					
 					for _, v in ipairs(parts) do
 						local newent = v:GetComponent(v):GetEntity() 
@@ -10148,7 +10164,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 						local obj2 = getEntityFromManagerById(newent:GetEntityID(),true) 
 						
 					
-						if (cyberscript.EntityManager[tag] == nil and goodEntity == true) then
+						if (cyberscript.EntityManager[tag] == nil and goodEntity == true and counter <= max) then
 							
 							local entity = {}
 							if(obj2.id == nil) then
@@ -10202,11 +10218,15 @@ function executeAction(action,tag,parent,index,source,executortag)
 							
 							if(#action.action > 0) then
 								runActionList(action.action, tag.."_forentitylist", parent,source,false,entity.tag)							end
+						
+						
+							end
+
+							counter = counter +1
+						
+						
+						
 						end
-						
-						
-						
-					end
 					end
 					
 				
@@ -10224,7 +10244,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 					cyberscript.GroupManager["temp_enemy_around_group"].tag = "temp_enemy_around_group"
 					cyberscript.GroupManager["temp_enemy_around_group"].entities = {}
 					print(#parts)
-				
+					local counter = 0
+					local max  = 9999
+					if(action.limit ~= nil and action.limit ~= 0) then max  = action.limit end
+					
 					for _, v in ipairs(parts) do
 						local newent = v:GetComponent(v):GetEntity() 
 						local goodEntity = false
@@ -10255,12 +10278,11 @@ function executeAction(action,tag,parent,index,source,executortag)
 						
 						
 						local tag = "scripted_enemy_around_"..math.random(0,9999)
-						local obj = getEntityFromManager(tag)
-						
+						local obj2 = getEntityFromManagerById(newent:GetEntityID(),true) 
 						
 
 
-						if (cyberscript.EntityManager[tag] == nil and goodEntity == true) then
+						if (cyberscript.EntityManager[tag] == nil and goodEntity == true and counter <= max) then
 							
 							local entity = {}
 							if(obj2.id == nil) then
@@ -10314,8 +10336,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 							
 							if(#action.action > 0) then
 								runActionList(action.action, tag.."_forentitylist", parent,source,false,entity.tag)							end
-						end
-						
+							end
+							counter = counter +1
 						
 						
 					end
@@ -13760,6 +13782,22 @@ function GenerateTextFromContextValues(context, v,source)
 		if(v.key == "current_gang") then
 			
 			value = getVariableKey("player","current_gang")
+			
+		end
+
+		if(v.key == "cred") then
+			
+			local mod_score = Game.GetStatsSystem():GetStatValue(Game.GetPlayer():GetEntityID(), "StreetCred")
+				
+			value = tonumber(mod_score)
+			
+		end
+
+		if(v.key == "level") then
+			
+			local mod_score = Game.GetStatsSystem():GetStatValue(Game.GetPlayer():GetEntityID(), "Level")
+				
+			value = tonumber(mod_score)
 			
 		end
 		

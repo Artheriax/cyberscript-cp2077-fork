@@ -762,14 +762,14 @@ function FillList(objtype,tabl, datapackname)
 							
 							if(#value > 0) then
 								for i=1,#value do
-									local path = "datapack/"..objtype.."/"..value[i].tag..".json"
+									local path = "scripts/"..objtype.."/"..value[i].tag..".json"
 									rootpath = path
 									makeTypeCachedObject(objtype,value[i],nil,path,datapackname)
 									
 								end
 							else
 								if(value.tag ~= nil) then
-									local path = "datapack/"..objtype.."/"..key
+									local path = "scripts/"..objtype.."/"..key
 									rootpath = path
 									cyberscript.cache["circuit"][value.tag] = {}
 									cyberscript.cache["circuit"][value.tag].data = value
@@ -784,7 +784,7 @@ function FillList(objtype,tabl, datapackname)
 							
 							if(#value > 0) then
 								for i=1,#value do
-									local path = "datapack/"..objtype.."/"..value[i].tag..".json"
+									local path = "scripts/"..objtype.."/"..value[i].tag..".json"
 									rootpath = path
 									makeTypeCachedObject(objtype,value[i],nil,path,datapackname)
 									
@@ -794,7 +794,7 @@ function FillList(objtype,tabl, datapackname)
 								end
 							else
 								if(value.tag ~= nil) then
-									local path = "datapack/"..objtype.."/"..key
+									local path = "scripts/"..objtype.."/"..key
 									rootpath = path
 									makeTypeCachedObject(objtype,value,nil,path,datapackname)
 									
@@ -807,34 +807,34 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "event") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 						end
 						elseif(objtype == "faction") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "fixer") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "functions") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "help") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
@@ -844,7 +844,7 @@ function FillList(objtype,tabl, datapackname)
 						
 							
 							
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							
 							
@@ -958,7 +958,7 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "interact") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
@@ -967,7 +967,7 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "interfaces") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
@@ -975,7 +975,7 @@ function FillList(objtype,tabl, datapackname)
 						elseif(objtype == "lang") then
 						
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							cyberscript.cache["lang"][value.tag] = {}
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
@@ -985,7 +985,7 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "mission") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
@@ -996,7 +996,7 @@ function FillList(objtype,tabl, datapackname)
 							
 							if(#value > 0) then
 								for i=1,#value do
-									local path = "datapack/"..objtype.."/"..value[i].tag..".json"
+									local path = "scripts/"..objtype.."/"..value[i].tag..".json"
 									rootpath = path
 									makeTypeCachedObject(objtype,value[i],nil,path,datapackname)
 									
@@ -1004,7 +1004,7 @@ function FillList(objtype,tabl, datapackname)
 								
 							else
 								if(value.tag ~= nil) then
-									local path = "datapack/"..objtype.."/"..key
+									local path = "scripts/"..objtype.."/"..key
 									rootpath = path
 									cyberscript.cache["node"][tostring(value.tag)] = {}
 									cyberscript.cache["node"][tostring(value.tag)].data = value
@@ -1017,7 +1017,7 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "npc") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 						
@@ -1034,14 +1034,14 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "path") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "phone_dialog") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 						
@@ -1098,14 +1098,14 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "place") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "poi") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							if(value.tag == nil) then
 								value.tag = key..tostring(math.random(1,99999))
@@ -1115,7 +1115,7 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "radio") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 						
@@ -1124,7 +1124,7 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "shard") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
@@ -1135,7 +1135,7 @@ function FillList(objtype,tabl, datapackname)
 							
 							if(#value > 0) then
 								for i=1,#value do
-									local path = "datapack/"..objtype.."/"..value[i].tag..".json"
+									local path = "scripts/"..objtype.."/"..value[i].tag..".json"
 									rootpath = path
 									makeTypeCachedObject(objtype,value[i],nil,path,datapackname)
 									
@@ -1145,7 +1145,7 @@ function FillList(objtype,tabl, datapackname)
 								
 							else
 								if(value.tag ~= nil) then
-									local path = "datapack/"..objtype.."/"..key
+									local path = "scripts/"..objtype.."/"..key
 									rootpath = path
 									makeTypeCachedObject(objtype,value,nil,path,datapackname)
 									
@@ -1154,7 +1154,7 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "texture") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							
 							cyberscript.cache[objtype][key] = {}
@@ -1166,35 +1166,35 @@ function FillList(objtype,tabl, datapackname)
 						end
 						elseif(objtype == "scene") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 						
 						end
 						elseif(objtype == "housing_template") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "hud") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "setting") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "codex") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
@@ -1202,56 +1202,56 @@ function FillList(objtype,tabl, datapackname)
 						
 						elseif(objtype == "webpage") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "email") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "character") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,"name",path,datapackname)
 							
 						end
 						elseif(objtype == "tweakflat") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "quickhack") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							
 						end
 						elseif(objtype == "garage") then
 						for key, value in pairs(tabl) do 
-							local path = "datapack/"..objtype.."/"..key
+							local path = "scripts/"..objtype.."/"..key
 							rootpath = path
 							
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 						end
 						elseif(objtype == "ai") then
 							for key, value in pairs(tabl) do 
-								local path = "datapack/"..objtype.."/"..key
+								local path = "scripts/"..objtype.."/"..key
 								rootpath = path
 								
 								makeTypeCachedObject(objtype,value,nil,path,datapackname)
 							end
 					elseif(objtype == "aitemplate") then
 							for key, value in pairs(tabl) do 
-								local path = "datapack/"..objtype.."/"..key
+								local path = "scripts/"..objtype.."/"..key
 								rootpath = path
 								
 								makeTypeCachedObject(objtype,value,nil,path,datapackname)

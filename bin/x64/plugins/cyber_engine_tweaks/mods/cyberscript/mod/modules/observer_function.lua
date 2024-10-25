@@ -83,9 +83,9 @@ function listenPlayerInput(action)
 	-- end
 	
 	-- if (string.find(tostring(actionName), "AXIS") == nil) then
-	logme(1,actionName,true)
-	-- --logme(10,"currentPhoneConversation"..dump(currentPhoneConversation))
-	logme(1,actionType,true)
+	-- logme(1,actionName,true)
+	-- -- --logme(10,"currentPhoneConversation"..dump(currentPhoneConversation))
+	-- logme(1,actionType,true)
 	-- end
 	
 	local phoneAction = false 
@@ -130,8 +130,10 @@ function listenPlayerInput(action)
 			if(currentHelp ~= nil and currentHelpIndex-1 < #currentHelp.section)then
 				
 				UIPopupsManager.ClosePopup()
+				workerTable[currentHelp.tag] = nil
 				currentHelp = nil
 				currentHelpIndex = 1
+				
 				else
 				actionh.name = "previous_help"
 				table.insert(actionlisth,actionh)
@@ -155,8 +157,10 @@ function listenPlayerInput(action)
 			
 			if(currentHelpIndex+1 > #currentHelp.section)then
 				UIPopupsManager.ClosePopup()
+				workerTable[currentHelp.tag] = nil
 				currentHelp = nil
 				currentHelpIndex = 1
+				
 				else
 				actionh.name = "next_help"
 				table.insert(actionlisth,actionh)

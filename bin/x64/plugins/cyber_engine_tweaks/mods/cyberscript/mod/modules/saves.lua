@@ -587,7 +587,7 @@ function setVariable(tag,key,score)
 		currentSave.Variable[tag] = {}
 		
 	end
-	currentSave.Variable[tag][key] = {}
+	
 	currentSave.Variable[tag][key] = score
 	-- if(type(score) == "string") then
 		
