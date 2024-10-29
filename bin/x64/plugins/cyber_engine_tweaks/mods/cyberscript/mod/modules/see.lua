@@ -9089,6 +9089,25 @@ function executeAction(action,tag,parent,index,source,executortag)
 						RotateEntityTo(enti, action.pitch, action.yaw, action.roll)
 					end
 				end
+
+				if(action.name == "rotate_entity_relative") then
+					local obj = getEntityFromManager(action.tag)
+					local enti = Game.FindEntityByID(obj.id)
+					if(enti ~= nil) then
+
+						local qat = enti:GetWorldOrientation()
+						local angle = GetSingleton('Quaternion'):ToEulerAngles(qat)
+						local obj = {}
+						print(dump((angle)))
+						obj.yaw = angle.yaw + action.yaw
+						obj.pitch = angle.pitch + action.pitch
+						obj.roll = angle.roll + action.roll
+						
+						print(dump((obj)))
+
+						RotateEntityTo(enti, obj.pitch, obj.yaw, obj.roll)
+					end
+				end
 				
 				if(action.name == "rotate_entity_to_position") then
 					action.output = true
@@ -11898,26 +11917,27 @@ function executeAction(action,tag,parent,index,source,executortag)
 						tempangle.pitch = 0
 						tempangle.yaw = 0
 						
-						local numbertimes = 0
+						
 						local zpath=action.zfly
 						
-						
+						local zspeed = 0.5
 						
 						
 						newaction = {}
 						newaction.name = "wait_second"
-						newaction.value = 0.5
+						newaction.value = 0.7
 						table.insert(actionlist,newaction)
 						
 						if(action.isAV == true) then
 							local ztimes = action.zfly - myPos.z
 							local zpos = deepcopy(newPos.z,nil)
-							numbertimes = ztimes / zpath
+							local numbertimes = (ztimes)/zspeed
+							print("numbertimes "..numbertimes)
 							
-							for i=1,ztimes  do 
+							for i=1,numbertimes  do 
 								
 								
-								zpos = zpos + 1
+								zpos = zpos + zspeed
 								
 								local newaction = {}
 								newaction.name = "teleport_entity_at_position"
@@ -11968,14 +11988,14 @@ function executeAction(action,tag,parent,index,source,executortag)
 						
 						if(action.isAV == true) then
 							
-							local ztimes = (action.zfly - mappin.z - 3)/0.2
+							local ztimes = (action.zfly - mappin.z - 3)
 							local zpos = deepcopy(ztimes,nil)
-							numbertimes = ztimes
+							local numbertimes = ztimes/zspeed
 							
 							for i=1,numbertimes  do 
 								
 								
-								zpos = zpos - 0.2
+								zpos = zpos - zspeed
 								
 								local newaction = {}
 								newaction.name = "teleport_entity_at_position"

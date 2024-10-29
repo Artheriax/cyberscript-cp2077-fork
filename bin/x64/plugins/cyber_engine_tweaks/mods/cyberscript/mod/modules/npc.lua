@@ -1633,7 +1633,7 @@ if actionRegion then
 							Game.GetPlayer():GetFPPCameraComponent().pitchMin = rot.pitch - 0.01
 							Game.GetPlayer():GetFPPCameraComponent().pitchMax = rot.pitch
 							Game.GetPlayer():GetFPPCameraComponent():SetLocalOrientation(GetSingleton('EulerAngles'):ToQuat(EulerAngles.new(rot.roll, 0, 0)))
-							else
+						else
 							local test = nil
 							pcall(function()
 								local cmd = NewObject('handle:AITeleportCommand')
@@ -2002,9 +2002,9 @@ if actionRegion then
 				rot =  GetSingleton('Quaternion'):ToEulerAngles(objlook:GetWorldOrientation())
 				end
 				
-				print(dump(position))
-				print(dump(rot))
-				print(GameDump(objlook))	
+				-- print(dump(position))
+				-- print(dump(rot))
+				-- print(GameDump(objlook))	
 					Game.GetTeleportationFacility():Teleport(objlook, Vector4.new(position.x, position.y, position.z,1) , rot)
 			end
 			else
@@ -2988,6 +2988,7 @@ if vehiculeRegion then
 							mountEvent.mountData = data
 							AVseat = seat
 							Game.GetMountingFacility():Mount(mountEvent)
+							if(vehiculeobj.takenSeat == nil) then vehiculeobj.takenSeat = {} end
 							table.insert(vehiculeobj.takenSeat,seat)
 							entityobj.vehicleid = vehiculeobj.id
 							

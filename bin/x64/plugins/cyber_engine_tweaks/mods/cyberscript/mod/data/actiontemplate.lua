@@ -1632,6 +1632,15 @@ return {
 		["helper"] = "This action will rotate a custom entity",
 		["tag"] = "guy01",
 	},
+	["rotate_entity_relative"] = {
+		["roll"] = 0,
+		["pitch"] = 0,
+		["yaw"] = 0,
+		["helperTitle"] = "Entity : Relative Rotate ",
+		["name"] = "rotate_entity_relative",
+		["helper"] = "This action will rotate a custom entity relatively",
+		["tag"] = "guy01",
+	},
 	["set_entity_node_next_auto"] = {
 		["helper"] = "This action will set Next node automatically for a entity",
 		["tag"] = "myentity",
