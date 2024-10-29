@@ -460,7 +460,7 @@ function ImportLanguage()
 	
 	logme(2,"Language default...")
 	
-	local f = io.open("mod/lang/default.json")
+	local f = io.open("assets/lang/default.json")
 	lines = f:read("*a")
 	if(lines ~= "") then
 		local fil = trydecodeJSOn(lines, f,filepath)

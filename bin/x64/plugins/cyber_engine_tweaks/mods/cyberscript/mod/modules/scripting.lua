@@ -5155,7 +5155,7 @@ function refreshModVariable(active)
 		
 		curRot = GetSingleton('Quaternion'):ToEulerAngles(Game.GetPlayer():GetWorldOrientation())
 		
-		districtState = lang.Friendly
+		districtState = getLang("Friendly")
 		getCurrentDistrict2()
 		
 		
