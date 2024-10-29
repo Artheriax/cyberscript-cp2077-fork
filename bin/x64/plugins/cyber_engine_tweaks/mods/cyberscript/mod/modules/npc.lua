@@ -755,30 +755,30 @@ function despawnAll()
 	
 	
 	
-	if(Game.GetPlayer()) then
-		local inVehiculse = Game.GetWorkspotSystem():IsActorInWorkspot(Game.GetPlayer())
-		if(inVehiculse == false) then
+	-- if(Game.GetPlayer()) then
+	-- 	local inVehiculse = Game.GetWorkspotSystem():IsActorInWorkspot(Game.GetPlayer())
+	-- 	if(inVehiculse == false) then
 			
 			
-			-- for i = -100, -1 do
+	-- 		-- for i = -100, -1 do
 			
-			-- Game.GetPreventionSpawnSystem():RequestDespawnPreventionLevel(i)
+	-- 		-- Game.GetPreventionSpawnSystem():RequestDespawnPreventionLevel(i)
 			
-			-- end
+	-- 		-- end
 			
-			for i=1,#arrayVehicles do
-				despawnVehicle(arrayVehicles[i])
-			end
-			
-			
-			else
-			
-			Game.GetPlayer():SetWarningMessage("Go out of vehicule to despawn entities")
+	-- 		for i=1,#arrayVehicles do
+	-- 			despawnVehicle(arrayVehicles[i])
+	-- 		end
 			
 			
-		end
+	-- 		else
+			
+	-- 		Game.GetPlayer():SetWarningMessage("Go out of vehicule to despawn entities")
+			
+			
+	-- 	end
 		
-	end
+	-- end
 	-- Game.GetPreventionSpawnSystem():RequestDespawnPreventionLevel(-2)
 	-- Game.GetPreventionSpawnSystem():RequestDespawnPreventionLevel(-95)
 	-- Game.GetPreventionSpawnSystem():RequestDespawnPreventionLevel(-2)

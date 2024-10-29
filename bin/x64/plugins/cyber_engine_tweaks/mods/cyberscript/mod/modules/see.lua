@@ -5867,7 +5867,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 							dialogLine.isPersistent  = true
 							dialogLine.duration  = action.duration
 							local restry,msg = pcall(function()
-								GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
+									GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								end
+								
 							end)
 							
 							if(restry == false) then
@@ -5882,8 +5885,9 @@ function executeAction(action,tag,parent,index,source,executortag)
 										
 									end
 								end
-								
-								GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
+									GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								end
 								
 							end
 							
@@ -5952,7 +5956,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 						if(candotext == true) then
 							dialogLine.isPersistent  = true
 							dialogLine.duration  = action.duration
-							GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+							if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
+								GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+							end
+							
 							local temp = os.time(os.date("!*t"))+0 
 							local nexttemp = temp
 							nexttemp =nexttemp +  action.duration
@@ -6000,7 +6007,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 						if(candotext == true) then
 							dialogLine.isPersistent  = true
 							dialogLine.duration  = action.duration
-							GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+							if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
+								GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+							end
+							
 							local temp = os.time(os.date("!*t"))+0 
 							local nexttemp = temp
 							nexttemp =nexttemp +  action.duration
@@ -6052,7 +6062,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 							if(candotext == true) then
 								dialogLine.isPersistent  = true
 								dialogLine.duration  = action.duration
-								GameController["ChattersGameController"]:SpawnDialogLine(dialogLine)
+								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Overheads"):GetValue() == true) then
+									GameController["ChattersGameController"]:SpawnDialogLine(dialogLine)
+								end
+								
 								local temp = os.time(os.date("!*t"))+0 
 								local nexttemp = temp
 								nexttemp =nexttemp +  action.duration
@@ -6106,7 +6119,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 							if(candotext == true) then
 								dialogLine.isPersistent  = true
 								dialogLine.duration  = action.duration
-								GameController["ChattersGameController"]:SpawnDialogLine(dialogLine)
+								
+								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Overheads"):GetValue() == true) then
+									GameController["ChattersGameController"]:SpawnDialogLine(dialogLine)
+								end
 								local temp = os.time(os.date("!*t"))+0 
 								local nexttemp = temp
 								nexttemp =nexttemp +  action.duration
@@ -7248,7 +7264,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 							if(candotext == true) then
 								dialogLine.isPersistent  = true
 								dialogLine.duration  = math.ceil(cyberscript.cache["sound"][action.value].data.duration)
-								GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								
+								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
+									GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								end
 								local temp = os.time(os.date("!*t"))+0 
 								local nexttemp = temp
 								nexttemp =nexttemp +  math.ceil(cyberscript.cache["sound"][action.value].data.duration)
@@ -7353,7 +7372,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 							if(candotext == true) then
 								dialogLine.isPersistent  = true
 								dialogLine.duration  = math.ceil(cyberscript.cache["sound"][tag].data.duration)
-								GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								
+								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
+									GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
+								end
 								local temp = os.time(os.date("!*t"))+0 
 								local nexttemp = temp
 								nexttemp =nexttemp +  math.ceil(cyberscript.cache["sound"][tag].data.duration)
@@ -7561,7 +7583,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 								if(candotext == true) then
 									dialogLine.isPersistent  = false
 									dialogLine.duration  = math.ceil(cyberscript.cache["sound"][action.value].data.duration)
-									GameController["ChattersGameController"]:SpawnDialogLine(dialogLine)
+									
+									if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Overheads"):GetValue() == true) then
+										GameController["ChattersGameController"]:SpawnDialogLine(dialogLine)
+									end
 									local temp = os.time(os.date("!*t"))+0 
 									local nexttemp = temp
 									nexttemp =nexttemp +  math.ceil(cyberscript.cache["sound"][action.value].data.duration)
@@ -11938,19 +11963,19 @@ function executeAction(action,tag,parent,index,source,executortag)
 						
 						newaction = {}
 						newaction.name = "wait_second"
-						newaction.value = 0.5
+						newaction.value = 0.7
 						table.insert(actionlist,newaction)
 						
 						if(action.isAV == true) then
 							
-							local ztimes = action.zfly - mappin.z - 3
+							local ztimes = (action.zfly - mappin.z - 3)/0.2
 							local zpos = deepcopy(ztimes,nil)
 							numbertimes = ztimes
 							
 							for i=1,numbertimes  do 
 								
 								
-								zpos = zpos - 1
+								zpos = zpos - 0.2
 								
 								local newaction = {}
 								newaction.name = "teleport_entity_at_position"
