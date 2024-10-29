@@ -207,8 +207,8 @@ function QuestThreadManager()
 					local action = {}
 					
 					action.name = "quest_notification"
-					action.title =  currentQuest.title
-					action.desc = currentQuest.content
+					action.title =  getLang(currentQuest.title)
+					action.desc = getLang(currentQuest.content)
 					if(currentQuest.extra ~= nil and currentQuest.extra.fail ~= nil) then
 						action.desc = currentQuest.extra.fail
 					end
@@ -367,7 +367,7 @@ function startQuest(quest)
 		action.name = "quest_notification"
 		action.title =  currentQuest.title
 		
-		action.desc = currentQuest.content..getLang("mission_start_look_map")
+		action.desc = getLang(currentQuest.content)..getLang("mission_start_look_map")
 		if(currentQuest.extra ~= nil and currentQuest.extra.new ~= nil) then
 			action.desc = currentQuest.extra.new
 		end

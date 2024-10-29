@@ -1740,6 +1740,7 @@ return {
 	},
 	["spawn_npc"] = {
 		["create_group_if_not_exist"] = false,
+		["isboss"] = false,
 		["source"] = "npc",
 		["source_tag"] = "Character.Judy",
 		["source_helper"] = "npc||current_star||faction||faction_random_list||current_district_leader||current_subdistrict_leader||district_leader||subdistrict_leader||random||from_list||district_rival||subdistrict_rival||current_district_rival||current_subdistrict_rival||custom_npc",

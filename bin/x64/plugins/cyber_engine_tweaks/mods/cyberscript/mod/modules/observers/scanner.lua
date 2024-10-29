@@ -488,10 +488,10 @@ function QuickhacksListGameController_PopulateData(this,data,wrappedMethod)
 			mydata.actionOwnerName = CName("cyberscript_hack:"..v.data.tag)
 			mydata.icon = TweakDBID.new(v.data.icon)
 			mydata.iconCategory = CName("cyberscript_hack_category")
-			mydata.title = v.data.title
-			mydata.titleAlternative = v.data.titlealternative
-			mydata.description = v.data.description
-			mydata.inactiveReason = v.data.inactivereason
+			mydata.title = getLang(v.data.title)
+			mydata.titleAlternative = getLang(v.data.titlealternative)
+			mydata.description = getLang(v.data.description)
+			mydata.inactiveReason = getLang(v.data.inactivereason)
 			mydata.isLocked = checkTriggerRequirement(v.data.unlockrequirement,v.data.unlocktrigger) == false
 			mydata.type = v.data.actiontype
 			mydata.cost = v.data.cost

@@ -34,8 +34,8 @@ function SimpleQuestListItemController_OnDataChanged(this,data)
 			end
 		end
 		
-		inkTextRef.SetText(this.title, mymission.title)
-		inkTextRef.SetText(this.description, mymission.content)
+		inkTextRef.SetText(this.title, getLang(mymission.title))
+		inkTextRef.SetText(this.description, getLang(mymission.content))
 		inkWidgetRef.SetVisible(this.description, true);
 		inkWidgetRef.SetVisible(this.ep1Icon, false)
 		inkImageRef.SetTexturePart(this.typeIcon, QuestTypeIconUtils.GetIcon(mymission.questtype))

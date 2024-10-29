@@ -98,13 +98,14 @@ function listenPlayerInput(action)
 		Game.GetPlayer():QueueEvent(audioEvent)
 		
 		runActionList(currentPhoneCall.rejected_action,"phone_call","interact",false,"player")
-		incomingCallGameController:OnInitialize()
 		currentPhoneCall = nil
+		incomingCallGameController:OnInitialize()
+		
 		
 		phoneAction = false 
 		else
 		if actionName == "PhoneInteract" and phoneAction == false and actionType == "BUTTON_RELEASED" and currentPhoneCall ~= nil   then 
-			logme(10,"dddssssd")
+			
 			StatusEffectHelper.RemoveStatusEffect(Game.GetPlayer(), "GameplayRestriction.NoCombat")
 			
 			local audioEvent = SoundStopEvent.new()
@@ -112,8 +113,9 @@ function listenPlayerInput(action)
 			Game.GetPlayer():QueueEvent(audioEvent)
 			
 			runActionList(currentPhoneCall.answer_action,"phone_call","interact",false,"player")
-			incomingCallGameController:OnInitialize()
 			currentPhoneCall = nil
+			incomingCallGameController:OnInitialize()
+			
 			StatusEffectHelper.RemoveStatusEffect(Game.GetPlayer(), "GameplayRestriction.NoCombat")
 			
 		end

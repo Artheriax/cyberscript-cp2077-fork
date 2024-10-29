@@ -897,7 +897,8 @@ function inGameInit() -- init some function after save loaded
 			
 	
 	draw = true
-	
+	StatusEffectHelper.RemoveStatusEffect(Game.GetPlayer(), "GameplayRestriction.NoCombat")
+			
 	despawnAll()
 	local codewareIsInstalled,message = pcall(function()
 		Game.GetDynamicEntitySystem()

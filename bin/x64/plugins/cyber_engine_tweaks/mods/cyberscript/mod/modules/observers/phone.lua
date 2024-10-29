@@ -64,7 +64,7 @@ function NewHudPhoneGameController_ToggleShowAllMessages(this,types)
 
 						
 						itemData.localizedName  =  getLang(phoneConversation.speaker)
-						itemData.localizedPreview  =  conversation.name
+						itemData.localizedPreview  =  getLang(conversation.name)
 						itemData.avatarID = TweakDBID.new("PhoneAvatars.Avatar_Unknown")
 						itemData.questRelated  =  false
 						itemData.hasQuestImportantReply  =  false
@@ -74,7 +74,7 @@ function NewHudPhoneGameController_ToggleShowAllMessages(this,types)
 						itemData.unreadMessages  = unreadMessages
 						itemData.playerCanReply   =  (latestmessage.choices and #latestmessage.choices > 0)
 						itemData.playerIsLastSender   =  latestmessage.sender == 1
-						itemData.lastMesssagePreview  =  conversation.name
+						itemData.lastMesssagePreview  =  getLang(conversation.name)
 						itemData.threadsCount  = 0
 						cyberscript.cache["phone_dialog"][k].data.conversation[z].hash =0 - tonumber(tostring(phoneConversation.hash)..math.random(1,100))
 						cyberscript.cache["phone_dialog"][k].data.conversation[z].conversationHash =0 - tonumber(tostring(phoneConversation.hash)..math.random(1,100))

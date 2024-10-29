@@ -334,7 +334,7 @@ if spawnRegion then
 		
 	end
 	
-	function spawnNPC(chara,appearance, tag, x, y ,z, spawnlevel, isprevention, isMPplayer, scriptlevel, isitem, rotation,despawntimer,codeware,persistState,persistSpawn,AlwaysSpawned,SpawnInView,dontregister,name)
+	function spawnNPC(chara,appearance, tag, x, y ,z, spawnlevel, isprevention, isMPplayer, scriptlevel, isitem, rotation,despawntimer,codeware,persistState,persistSpawn,AlwaysSpawned,SpawnInView,dontregister,name,isboss)
 		
 		
 		
@@ -360,11 +360,45 @@ if spawnRegion then
 				
 				--	worldpos:SetPosition(worldpos, vec4)	
 				
-				local twk = TweakDBID.new(chara)
+				
 				if appearance == "none" then appearance = "" end
 				local NPC = nil 
 				codeware = true
-				
+			
+				if(isboss)then
+					TweakDB:CloneRecord(tag, chara)
+					TweakDB:SetFlat(tag..".rarity", "NPCRarity.Boss")
+
+					
+					
+					local parent = {}
+					for i,v in ipairs(cyberscript.entities) do
+					
+						if(v.entity_tweak == chara) then parent = deepcopy(v, nil) break end
+					
+					end
+								
+					
+					parent.entity_id = TweakDBID.new(tag).hash
+					
+					parent.entity_name = tag
+					
+					parent.entity_tweak = tag
+					
+					local caninsert = true
+					
+					for i,v in ipairs(cyberscript.entities) do
+					
+						if(v.entity_id == parent.entity_id) then caninsert = false end
+					
+					end
+					
+					if caninsert == true then table.insert(cyberscript.entities,parent)end
+					
+					chara = tag
+
+				end
+				local twk = TweakDBID.new(chara)
 				
 				local postp = Vector4.new( x, y, z,1)
 				
@@ -391,7 +425,7 @@ if spawnRegion then
 				npcSpec.spawnInView =  true
 
 				local textdump = {}
-			if(chara:sub(-4) == ".ent")then
+				if(chara:sub(-4) == ".ent")then
 					textdump.templatePath = chara
 				else
 					textdump.recordID = chara

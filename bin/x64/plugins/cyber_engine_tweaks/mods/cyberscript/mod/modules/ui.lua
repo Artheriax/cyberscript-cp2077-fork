@@ -901,6 +901,11 @@ function buildnativesetting()
 		--update current controller label
 		nativeSettings["CSKEYBIND"].subcategories["InfoController"].label = "Current controller configuration : "..currentControllerName
 	end
+	
+	
+
+	
+
 	-- Add our mods tab (path, label)
 	if(isEmpty(cyberscript.cache["setting"]) == false) then
 		
@@ -948,7 +953,7 @@ function buildnativesetting()
 				
 				
 				if setting.type == "button" then
-					nativeSettings.addButton(subcat, getLang(setting.label), getLang(setting.description),setting.buttonlabel, setting.textsize, function()
+					nativeSettings.addButton(subcat, getLang(setting.label), getLang(setting.description),getLang(setting.buttonlabel), setting.textsize, function()
 						runActionList(setting.action, setting.tag, "interact",false,"nothing",true)
 						
 					end)
@@ -1055,6 +1060,92 @@ function buildnativesetting()
 	
 	
 	
+end
+
+function makefavoritesetting()
+	if(nativeSettings.pathExists("CSKEYBIND/favorite")) then
+		nativeSettings["CSKEYBIND"].subcategories["favorite"] = nil
+	end
+	
+	arrayDatapackIndex = {}
+	myarrayDatapackIndex = 1
+	
+	for k,v in pairs(arrayDatapack) do
+		table.insert(arrayDatapackIndex,k)
+		
+		
+	end
+
+	for i,k in ipairs(arrayDatapackIndex) do
+		
+		if(k == favoriteInteractGroup) then
+			myarrayDatapackIndex = i
+		end
+	
+		
+	end
+	nativeSettings.addSubcategory("/CSKEYBIND/favorite", getLang("setting_fav_menu_cat"))
+	nativeSettings.addSelectorString("/CSKEYBIND/favorite", getLang("setting_fav_menu_cat"), "Description", arrayDatapackIndex, myarrayDatapackIndex, 1, function(value)
+		myarrayDatapackIndex = value
+		print(value)
+		print(arrayDatapackIndex[value])
+		favoriteInteractGroup = arrayDatapackIndex[value]
+		updateUserSetting("favoriteInteractGroup", arrayDatapackIndex[value])
+		-- Add any logic you need in here, such as saving the changes to file / database
+	end)
+	
+	local info = inputManager.createBindingInfo() -- Create an info table that holds information for a binding, makes it easier to reuse later
+	info.keybindLabel =  getLang("setting_fav_menu_cat") -- Label of each key, will be followed by the key number, e.g. "Key 1"
+	info.keybindDescription =  getLang("setting_fav_menu_cat") -- Description that'll be displayed for all the bindings keys
+	info.supportsHold = true -- Whether to show the hold switches for this bindings keys
+	info.isHoldLabel = getLang("setting_hold_key")
+	info.isHoldDescription = getLang("setting_hold_key_desc")
+	info.id ="cyberscriptOpenFavorite"-- Unique id for the binding, used for the savedOptions/defaultOptions tables and the saveCallback. See above for more details
+	info.maxKeys = 3 -- Maximum amount of keys for this binding, shows a slider if it is bigger than 1
+	info.maxKeysLabel = getLang("setting_max_key") -- Label for the binding's key amount slider
+	info.maxKeysDescription = getLang("setting_max_key_desc")
+	info.nativeSettingsPath = "/CSKEYBIND/favorite" -- Native settings path for where to add the bindigs options, if it is a multikey binding it has to be a seperate subcategory
+	-- Table containing the default options
+	local defaultinput = {}
+	defaultinput["cyberscriptOpenFavorite"] = {}
+	defaultinput["cyberscriptOpenFavorite"]["keyboard"] = {}
+	defaultinput["cyberscriptOpenFavorite"]["gamepad"] = {}
+	for i=1,3 do
+	
+		defaultinput["cyberscriptOpenFavorite"]["keyboard"]["key_"..i] = "IK_X"
+		defaultinput["cyberscriptOpenFavorite"]["keyboard"]["hold_"..i] = false
+		defaultinput["cyberscriptOpenFavorite"]["gamepad"]["key_"..i] = "IK_X"
+		defaultinput["cyberscriptOpenFavorite"]["gamepad"]["hold_"..i] = false
+	
+	end
+	
+	defaultinput["cyberscriptOpenFavorite"]["keyboard"]["keys"] = 1
+	defaultinput["cyberscriptOpenFavorite"]["gamepad"]["keys"] = 1
+
+	info.defaultOptions = defaultinput
+	
+	if(arrayUserInput[info.id] ~= nil) then
+		info.savedOptions = {}
+		info.savedOptions[info.id] = {}
+		info.savedOptions[info.id] = arrayUserInput[info.id]-- Table containing the current options
+	else
+		arrayUserInput[info.id] =info.defaultOptions[info.id]
+	end
+	info.forceHold = false
+	info.saveCallback = function(name, value) -- Callback for when anything about the binding gets changed, gets the changed variable's generated name + the value
+		-- Store changed value
+
+		saveUserInput(info.id,name,value)
+		
+		
+	end
+	info.callback = function() -- Callback for when the binding has been activated
+		cycleInteractFavorite()
+	end
+	inputManager.addNativeSettingsBinding(info) 
+
+
+
 end
 
 function saveUserInput(id,name,value)
@@ -1525,8 +1616,8 @@ function makeNativeSettings()
 			
 		end)
 
-		nativeSettings.addSubcategory("/CSKEYBIND/gameplay", "Open Interact Menu")
-		
+		nativeSettings.addSubcategory("/CSKEYBIND/gameplay", getLang("setting_open_menu_cat"))
+	
 		local info = inputManager.createBindingInfo() -- Create an info table that holds information for a binding, makes it easier to reuse later
 		info.keybindLabel =  getLang("setting_open_menu") -- Label of each key, will be followed by the key number, e.g. "Key 1"
 		info.keybindDescription =  getLang("setting_open_menu_desc") -- Description that'll be displayed for all the bindings keys
@@ -1576,6 +1667,9 @@ function makeNativeSettings()
 			cycleInteract2()
 		end
 		inputManager.addNativeSettingsBinding(info) 
+
+
+		
 
 		nativeSettings.addSubcategory("/CSKEYBIND/holdTime", "Keybinding behavior")
 		nativeSettings.addRangeFloat("/CSKEYBIND/holdTime", "Keybinding Hold Time", "How long in second you need to hold the combo/key", 0.5, 100, 0.10, "%.2f", holdTime, 1, function(value) -- path, label, desc, min, max, step, currentValue, defaultValue, callback
@@ -1994,7 +2088,7 @@ function cycleInteract2()
 				local options = {}
 				options.requirement = interact.requirement
 				options.trigger = interact.trigger
-				options.description = interact.name
+				options.description = getLang(interact.name)
 				options.action = interact.action
 				
 				options.icon = interact.icon
@@ -2084,6 +2178,92 @@ function cycleInteract2()
 	
 	
 end
+
+function cycleInteractFavorite()
+	getTriggeredActions()
+	
+	getTriggeredActionsDisplay()
+	local dialog = {}
+	
+	dialog.trigger = {}
+	dialog.requirement = {}
+	dialog.desc = ""
+	dialog.tag = "cycleInteractFavorite"
+	dialog.speaker = favoriteInteractGroup
+	dialog.context = {}
+	dialog.options = {}
+	
+	
+	
+	for key,value in pairs(cyberscript.cache["interact"]) do --actualcode
+		
+		local interact = cyberscript.cache["interact"][key].data
+		checkContext(interact)
+		--testTriggerRequirement(interact2.requirement,interact2.trigger)
+		if(checkTriggerRequirement(interact.requirement,interact.trigger)) and 
+			(interact.group == favoriteInteractGroup and key ~= "default_open_datapack_group_ui") then
+			
+			if((interact.type == nil or interact.type == "interact") and (interact.display == nil or interact.display == "event_interact")) then
+				
+				local options = {}
+				options.requirement = interact.requirement
+				options.trigger = interact.trigger
+				options.description = getLang(interact.name)
+				print(interact.name)
+				options.action = interact.action
+				
+				options.icon = interact.icon
+				options.style = {}
+				if interact.style ~= nil and interact.style.textcolor ~= nil then
+					options.style.color = interact.style.textcolor
+					
+				end
+				options.tag = interact.tag
+				
+				
+				
+				
+				table.insert(dialog.options,options)
+				
+				else
+				if((interact.type == nil or interact.type == "hint")) then
+					
+					showInputHint(interact.key, getLang(interact.name), 1, interact.hold, interact.tag)
+				end
+			end
+			
+		end
+		
+		
+		
+		
+	end
+	
+	
+	
+	
+		
+	local options = {}
+	options.requirement = nil
+	options.trigger = nil
+	options.description = "Exit"
+	options.action = {}
+	
+	
+	options.action[1] = {}
+	options.action[1].name = "nothing"
+	
+	
+	
+	
+	
+	table.insert(dialog.options,options)
+	--print("mark2")
+	createDialog(dialog)
+	
+	
+end
+
 function Activatedshard(shard)
 	currentInterface = nil
 	----print(dump(shard))

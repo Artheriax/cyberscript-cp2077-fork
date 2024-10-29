@@ -103,12 +103,17 @@ function CodexGameController_PopulateData(thos)
 		
 		for k,v in pairs(cyberscript.cache["help"]) do
 			local codex = v.data
+			checkContext(codex)
 			local description = ""
+			
 			for i,section in ipairs(codex.section) do
-				if(section.message ~= nil) then
-					description = description..section.message.."\n\n\n"
+				local sectionbis = nil
+				sectionbis = deepcopy(section)
+				checkContext(sectionbis)
+				if(sectionbis.message ~= nil) then
+					description = description..sectionbis.message.."\n\n\n"
 					else
-					description = description..section.."\n\n\n"
+					description = description..sectionbis.."\n\n\n"
 				end
 			end
 			

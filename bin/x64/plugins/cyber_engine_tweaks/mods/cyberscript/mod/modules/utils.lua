@@ -456,14 +456,15 @@ end
 
 function ImportLanguage()
 	logme(2,"Importing Language...")
-	logme(2,file_exists("mod/lang/language.json"))
+	logme(2,file_exists("assets/lang/default.json"))
 	
 	logme(2,"Language default...")
 	
 	local f = io.open("mod/lang/default.json")
 	lines = f:read("*a")
 	if(lines ~= "") then
-		lang = trydecodeJSOn(lines, f,filepath)
+		local fil = trydecodeJSOn(lines, f,filepath)
+		lang = fil.languages
 	end
 	
 	f:close()
@@ -1236,12 +1237,12 @@ function registerMappintoEntity(target,tag,typemap,wall,active,mapgroup, title, 
 			obj.id = mapId
 			obj.tag = tag
 			obj.position = target:GetWorldPosition()
-			obj.title = title
+			obj.title = getLang(title)
 			obj.variant =  typemap
 			obj.range = range
 			obj.wall =  wall
 			obj.active =  activeMap
-			obj.desc = desc
+			obj.desc = getLang(desc)
 			obj.style = {}
 			obj.style.color = color
 			obj.style.icon = icon

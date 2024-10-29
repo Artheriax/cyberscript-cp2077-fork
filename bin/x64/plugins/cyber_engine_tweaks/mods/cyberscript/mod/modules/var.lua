@@ -3789,7 +3789,7 @@ function resetVar()
 	showcyberscriptfixeronmap = true
 	showFactionAffinityHud = true
 	
-	
+	myarrayDatapackIndex = 1
 	
 	
 	

@@ -3978,7 +3978,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 					local ts = Game.GetTransactionSystem()
 					local tid = TweakDBID.new("Items.money")
 					local itemid = ItemID.new(tid)
-					local amount = tonumber(action.price)
+					local amount =  tonumber(action.price..".000")
 					if currentHouse ~= nil and currentHouse.coef ~=nil and currentHouse.coef > 0 then
 						amount = amount * currentHouse.coef	
 					end
@@ -4014,7 +4014,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 					local ts = Game.GetTransactionSystem()
 					local tid = TweakDBID.new("Items.money")
 					local itemid = ItemID.new(tid)
-					local amount = tonumber(action.value)
+					local amount = tonumber(action.value..".000")
 					if currentHouse ~= nil and currentHouse.coef ~= nil then
 						amount = amount * currentHouse.coef	
 					end
@@ -4026,7 +4026,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 					local ts = Game.GetTransactionSystem()
 					local tid = TweakDBID.new("Items.money")
 					local itemid = ItemID.new(tid)
-					local amount = tonumber(action.value)
+					local amount = tonumber(action.value..".000")
+					print(amount)
 					if(action.useplacecoef ~= nil and action.useplacecoef == true) then
 						if currentHouse ~= nil and currentHouse.coef ~=nil then
 							amount = amount * currentHouse.coef	
@@ -4043,7 +4044,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 					local ts = Game.GetTransactionSystem()
 					local tid = TweakDBID.new("Items.money")
 					local itemid = ItemID.new(tid)
-					local amount = tonumber(action.value)
+					local amount =  math.random(tonumber(action.min..".000"),tonumber(action.max..".000"))
+				
 					if currentHouse ~= nil and currentHouse.coef ~=nil then
 						amount = amount * currentHouse.coef	
 					end
@@ -4752,7 +4754,10 @@ function executeAction(action,tag,parent,index,source,executortag)
 							currentHelp = nil
 							currentHelpIndex = 1
 							else
-							currentHelp.action = action
+							
+							local myHelp = deepcopy(currentHelp)
+							checkContext(myHelp)
+							myHelp.action = action
 							if UIPopupsManager.IsReady() then
 								local notificationData = TutorialPopupData.new()
 								notificationData.notificationName = CName("base\\gameplay\\gui\\widgets\\notifications\\tutorial.inkwidget")
@@ -4762,22 +4767,22 @@ function executeAction(action,tag,parent,index,source,executortag)
 								notificationData.position = action.popupposition
 								notificationData.isModal = action.ismodal
 								notificationData.margin = inkMargin.new()
-								notificationData.title = currentHelp.title
+								notificationData.title = myHelp.title
 								local section = nil
-								if(currentHelp.section[currentHelpIndex] ~= nil) then
-									section = deepcopy(currentHelp.section[currentHelpIndex])
+								if(myHelp.section[myHelp] ~= nil) then
+									section = deepcopy(myHelp.section[myHelp])
 								end
 
 								checkContext(section)
-								if(currentHelp.section[currentHelpIndex].message == nil) then
+								if(myHelp.section[myHelp].message == nil) then
 									
 									notificationData.message = "no data"
 
 									else
 									
 									notificationData.message = section.message
-									if(#section.action > 0) then
-										runActionList(section.action, currentHelp.tag.."_"..currentHelpIndex, tag,source,false,executortag)
+									if(section.action ~=nil and #section.action > 0) then
+										runActionList(section.action, myHelp.tag.."_"..currentHelpIndex, tag,source,false,executortag)
 									end
 								end
 								notificationData.imageId = nil
@@ -4842,8 +4847,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 				
 				if(action.name == "shard_window") then
 					shardUIevent = NotifyShardRead.new()
-					shardUIevent.text = action.content
-					shardUIevent.title = action.title
+					shardUIevent.text = getLang(action.content)
+					shardUIevent.title = getLang(action.title)
 					Game.GetUISystem():QueueEvent(shardUIevent)
 				end
 				if(action.name == "add_time") then
@@ -7942,7 +7947,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 							rot.yaw = action.yaw
 							end
 
-							spawnNPC(chara,action.appearance, tag, position.x, position.y ,position.z,action.spawnlevel,action.use_police_prevention_system,false,action.scriptlevel,action.useEntpath,rot,action.despawntimer,action.usecodeware,action.persiststate,action.persistspawn,action.alwaysspawned,action.spawninview,action.dontregister)
+							spawnNPC(chara,action.appearance, tag, position.x, position.y ,position.z,action.spawnlevel,action.use_police_prevention_system,false,action.scriptlevel,action.useEntpath,rot,action.despawntimer,action.usecodeware,action.persiststate,action.persistspawn,action.alwaysspawned,action.spawninview,action.dontregister,action.npcname,action.isboss)
 							if(action.group ~= nil and action.group ~= "") then
 								
 								if(cyberscript.GroupManager[action.group] == nil and action.create_group_if_not_exist == true) then
@@ -13008,9 +13013,9 @@ function executeAction(action,tag,parent,index,source,executortag)
 					quest.reset_action = {}
 					
 					quest.unlock_action = {}
-					quest.content = questos.description
+					quest.content = getLang(questos.description)
 					quest.recommandedlevel = 5
-					quest.title = questos.title
+					quest.title = getLang(questos.title)
 					quest.questtype = 2
 					quest.recurrent = false
 					

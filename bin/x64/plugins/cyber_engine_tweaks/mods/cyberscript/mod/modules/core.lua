@@ -273,6 +273,7 @@ function SaveLoading()
 
 	holdTime = getUserSettingWithDefault("holdTime",holdTime)
 	
+	favoriteInteractGroup = getUserSettingWithDefault("favoriteInteractGroup","cyberscript")
 	
 	SetFlatFromSetting()
 	
@@ -334,6 +335,7 @@ function SaveLoading()
 	loadModule()
 	
 	makeNativeSettings()
+	makefavoritesetting()
 	print("save me")
 end
 -- ----------------------------------------------------------------------
