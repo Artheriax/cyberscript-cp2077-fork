@@ -10730,8 +10730,21 @@ function executeAction(action,tag,parent,index,source,executortag)
 					end
 					
 					
-					runSubActionList(actiontemp,tag.."play_several_anim_entity",tag, source,false,executortag,false)
-					result = false
+					
+
+					if(action.parallele == nil or action.parallele == false)then
+									
+						
+						runSubActionList(actiontemp,tag.."play_several_anim_entity",tag, source,false,executortag,false)
+						result=false
+						else
+						
+						runActionList(actiontemp,"play_several_anim_entity"..action.tag, source,false,executortag,false)
+					
+						
+					end
+
+					
 				end
 
 				if action.name == "play_animpack_entity" then
@@ -10785,10 +10798,19 @@ function executeAction(action,tag,parent,index,source,executortag)
 								
 								
 						end
+						if(action.parallele == nil or action.parallele == false)then
+									
+							runSubActionList(actiontemp,tag.."play_animpack_entity",tag, source,false,executortag,false)
+							
+							result=false
+							else
+							
+							runActionList(actiontemp,"play_animpack_entity"..action.tag.."_"..action.packtag, source,false,executortag,false)
 						
+							
+						end
 						
-						runSubActionList(actiontemp,tag.."play_several_anim_entity",tag, source,false,executortag,false)
-						result = false
+					
 					end
 				end
 				

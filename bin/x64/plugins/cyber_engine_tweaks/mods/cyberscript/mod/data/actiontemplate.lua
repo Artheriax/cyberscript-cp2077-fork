@@ -4288,7 +4288,7 @@ return {
 			}
 		
 		},
-		
+		["parallele"] = false,
 		["tag"] = "myshardtag",
 		["helperTitle"] = "Anim : Play severals Anims to Entity (if in same workspot)",
 		["name"] = "play_several_anim_entity",
@@ -4298,7 +4298,7 @@ return {
 
 		["helper"] = "This action will play an pack of animations to entity",
 	
-		
+		["parallele"] = false,
 		["tag"] = "myshardtag",
 		["helperTitle"] = "Anim : Play Animpack to Entity",
 		["name"] = "play_animpack_entity",
