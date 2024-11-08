@@ -775,6 +775,20 @@ function scriptcheckTrigger(trigger)
 					result = vehicule ~= nil
 				end
 			end
+
+			if(trigger.name == "in_entity_car") then
+				local vehicule = Game['GetMountedVehicle;GameObject'](Game.GetPlayer())
+				
+				if (vehicule ~= nil) then
+					
+					local obj = getEntityFromManager(trigger.tag)
+					local enti = Game.FindEntityByID(obj.id)	
+					if(enti ~= nil) then
+						result = (obj.id == vehicule:GetEntityID())
+					end
+				end
+
+			end
 			if(trigger.name == "entity_in_car") then
 				local obj = getEntityFromManager(trigger.tag)
 				local enti = Game.FindEntityByID(obj.id)	
@@ -9426,6 +9440,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 
 					local obj = getEntityFromManager(action.tag)
 					checkAttitudeCounter(obj)
+					resetFollower(action.tag)
 					Cron.After(0.5, function()
 					if action.attitude == "hostile" then
 						setAggressiveAgainst(action.tag, action.entity)
@@ -9442,6 +9457,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 					if action.attitude == "psycho" then
 						setPsycho(action.tag, action.entity)
 					end
+
+					
 				end)
 				end
 				
@@ -10232,8 +10249,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 
 									if(obj2.id ~= nil) then -- means it exist already in manager
 								
-										cyberscript.EntityManager[tag].primarytag = obj2.tag
-										entity.primarytag = obj2.tag
+										cyberscript.EntityManager[tag].tag = obj2.tag
+										entity.tag = obj2.tag
 									end
 
 								else
@@ -10350,8 +10367,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 
 									if(obj2.id ~= nil) then -- means it exist already in manager
 								
-										cyberscript.EntityManager[tag].primarytag = obj2.tag
-										entity.primarytag = obj2.tag
+										cyberscript.EntityManager[tag].tag = obj2.tag
+										entity.tag = obj2.tag
 									end
 
 								else
@@ -10640,8 +10657,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 					if(enti ~= nil and obj.animation ~= nil and obj.workspot_name ~= nil) then
 						
 							
-								TimeDilationHelper.SetIndividualTimeDilation(enti, "see_engine", 1, 1, "", "");
-								
+							TimeDilationHelper.UnsetIndividualTimeDilation(enti);
 							
 							local angle = nil
 							local anims = obj.animation
@@ -10668,12 +10684,127 @@ function executeAction(action,tag,parent,index,source,executortag)
 					
 					changeWorkSpotAnims(action.tag,action.anim,action.isinstant)
 				end
+
+				if action.name == "play_several_anim_entity" then
+					
+					local actiontemp = {}
+					for i,anim in ipairs(action.anims) do
+							local changewk =  false
+
+							if(animpack.anims[i-1]~= nil) then
+								
+								if
+								(action.anims[i-1].workspot ~= nil and action.anims[i-1].workspot ~= anim.workspot) or
+								(cyberscript.EntityManager[entitytag].workspot_name ~= nil and cyberscript.EntityManager[entitytag].workspot_name ~= anim.workspot)
+								then
+									changewk = true
+								end
+
+							end
+						
+							if(changewk == true) then
+								local wkmyaction = deepcopy(cyberscript.actiontemplate["change_play_anim_entity_workspot"],nil)
+								wkmyaction.workspottag = action.tag.."_workspot"
+								wkmyaction.workspot = anim.workspot
+								wkmyaction.unlockcamera = anim.unlockcamera or false
+								table.insert(actiontemp,wkmyaction)
+
+								local wkmyaction = deepcopy(cyberscript.actiontemplate["wait_tick"],nil)
+								wkmyaction.value =30
+								table.insert(actiontemp,wkmyaction)
+																	
+							end
+
+							local myaction = deepcopy(cyberscript.actiontemplate["change_anim_entity"],nil)
+							myaction.tag = action.tag
+							myaction.anim = anim.anim
+							myaction.isinstant = anim.isinstant
+							
+							table.insert(actiontemp,myaction)
+
+							local myaction = deepcopy(cyberscript.actiontemplate["wait_tick"],nil)
+							myaction.value =anim.timer
+							table.insert(actiontemp,myaction)
+							
+							
+					end
+					
+					
+					runSubActionList(actiontemp,tag.."play_several_anim_entity",tag, source,false,executortag,false)
+					result = false
+				end
+
+				if action.name == "play_animpack_entity" then
+					
+					if(cyberscript.cache["animpack"][action.packtag] ~= nil) then
+						local animpack = cyberscript.cache["animpack"][action.packtag].data
+
+						local actiontemp = {}
+						for i,anim in ipairs(animpack.anims) do
+								local changewk =  false
+
+								if(animpack.anims[i-1]~= nil) then
+									
+									if
+									(animpack.anims[i-1].workspot ~= nil and animpack.anims[i-1].workspot ~= anim.workspot) or
+									(cyberscript.EntityManager[entitytag].workspot_name ~= nil and cyberscript.EntityManager[entitytag].workspot_name ~= anim.workspot)
+									then
+										changewk = true
+									end
+
+								end
+								
+
+								
+
+								if(changewk == true) then
+									local wkmyaction = deepcopy(cyberscript.actiontemplate["change_play_anim_entity_workspot"],nil)
+									wkmyaction.workspottag = action.tag.."_workspot"
+									wkmyaction.workspot = anim.workspot
+									wkmyaction.unlockcamera = anim.unlockcamera or false
+									table.insert(actiontemp,wkmyaction)
+
+									local wkmyaction = deepcopy(cyberscript.actiontemplate["wait_tick"],nil)
+									wkmyaction.value =30
+									table.insert(actiontemp,wkmyaction)
+																		
+								end
+
+
+								local myaction = deepcopy(cyberscript.actiontemplate["change_anim_entity"],nil)
+								myaction.tag = action.tag
+								myaction.anim = anim.anim
+								myaction.isinstant = anim.isinstant
+								
+								
+								table.insert(actiontemp,myaction)
+
+								local myaction = deepcopy(cyberscript.actiontemplate["wait_tick"],nil)
+								myaction.value =anim.timer
+								table.insert(actiontemp,myaction)
+								
+								
+						end
+						
+						
+						runSubActionList(actiontemp,tag.."play_several_anim_entity",tag, source,false,executortag,false)
+						result = false
+					end
+				end
 				
 				if action.name == "change_anim_entity_workspot" then
 					
 					
 					changeWorkSpot(action.tag,action.workspottag,action.workspot,action.unlockcamera)
 					
+					
+				end
+
+				if action.name == "change_play_anim_entity_workspot" then
+					
+					
+					changeWorkSpot(action.tag,action.workspottag,action.workspot,action.unlockcamera)
+					changeWorkSpotAnims(action.tag,action.anim,action.isinstant)
 					
 				end
 				
@@ -13710,10 +13841,20 @@ end
 function GenerateTextFromContextValues(context, v,source)
 	
 	local value = ""
+
+	checkContext(v)
 	
 	if(v.context_value ~= nil) then
 		
 		v[v.replace] = GenerateTextFromContextValues(context, context.values[v.context_value],source)
+		
+	end
+
+	if(v.type == "context_props")then
+		
+		
+		print(dump(context))
+		value = GenerateTextFromContextValues(context, context.values[v.prop],source)
 		
 	end
 	

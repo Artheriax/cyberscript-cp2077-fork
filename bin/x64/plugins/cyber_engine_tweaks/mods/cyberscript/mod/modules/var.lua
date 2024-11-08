@@ -228,7 +228,8 @@ function resetVar()
 		"garage",
 		"ai",
 		"aitemplate",
-        "tweakflat"
+        "tweakflat",
+        "animpack"
 		
 	}
 

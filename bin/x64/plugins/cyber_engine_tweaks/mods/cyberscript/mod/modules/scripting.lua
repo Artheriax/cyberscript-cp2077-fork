@@ -194,54 +194,27 @@ function mainThread(active)-- update event when mod is ready and in game (main t
 		
 		
 		--Vehicle
-		local inVehicule = Game.GetWorkspotSystem():IsActorInWorkspot(Game.GetPlayer())
-		if (inVehicule) then
+		local vehicule = Game['GetMountedVehicle;GameObject'](Game.GetPlayer())
+		if(vehicule ~= nil) then
+			local obj = getEntityFromManagerById(vehicule:GetEntityID(),true)
 			
-			local vehicule = Game['GetMountedVehicle;GameObject'](Game.GetPlayer())
-			if(vehicule ~= nil) then
-				local obj = getEntityFromManagerById(vehicule:GetEntityID())
-				inVehiculeTweak = ""
-				
-				local isThiscar = (obj.id ~= nil and obj.isAV == true)
-				
-						
-						cyberscript.EntityManager["current_car"] = deepcopy(obj)
-								cyberscript.EntityManager["current_car"].tag = "current_car"
+				if(obj ~= nil) then
+					if cyberscript.EntityManager["current_car"].id ~=  obj.id then
+						cyberscript.EntityManager["current_car"].tag = obj.tag
 						cyberscript.EntityManager["current_car"].id = vehicule:GetEntityID()
 						
-				
-				if isThiscar then
-					AVisIn = true
+					end	
+				else
+					cyberscript.EntityManager["current_car"].tag = ""
+					cyberscript.EntityManager["current_car"].id = vehicule:GetEntityID()
 					
-					
-					CurrentAVEntity =  vehicule
-					local fppComp = Game.GetPlayer():GetFPPCameraComponent()
-					
-					local bool = false
-					-- bool = IsPlaying("env")
-					-- if(bool == false) then
-					-- local sound = getSoundByNameNamespace("av_engine.mp3","av")
-					-- if(sound ~= nil) then
-					-- local path = cyberscript.soundpath..sound.path
-					-- PlaySound(sound.name,path,"env",100)
-					-- end
-					-- end
-					
-					
-					end
-				
-			end
-		
-			--AV
-			refreshAV()
-		
+				end
 		else
-		
-			
-			if(cyberscript.EntityManager["current_car"] and cyberscript.EntityManager["current_car"].id ~= nil) then
-				cyberscript.EntityManager["current_car"].id = nil
-			end
-			
+				if(cyberscript.EntityManager["current_car"] and cyberscript.EntityManager["current_car"].id ~= nil) then
+					cyberscript.EntityManager["current_car"].id = nil
+					cyberscript.EntityManager["current_car"].tag = ""
+					
+				end
 		end
 		
 		
@@ -1557,6 +1530,14 @@ function checkWaitingAction(action,tag,parent,index)
 		end
 		
 	end
+
+	if(workerTable[tag]["children"] ~= nil and workerTable[workerTable[tag]["children"]] ~= nil) then
+
+		result = false
+		
+
+	end
+
 	
 	return result
 end
@@ -1751,7 +1732,7 @@ function runSubActionList(actionlist, tag, parent, source, isquest,executortag,b
 		
 		if(workerTable[tag] == nil) then
 			local copy = deepcopy(actionlist, copies)
-		print(tag)
+			print(tag)
 			-- for k,v in pairs(copy) then
 			-- copy[k]["active"] = true
 			-- end
@@ -4153,190 +4134,6 @@ function getItemCountInCart(tag)
 	
 end
 
-function getEntityFromManager(tag)
-	local obj = {}
-	obj.id = nil
-	
-	
-	local enti = cyberscript.EntityManager[tag]
-	if(enti ~= nil) then
-		obj = enti
-	end
-	
-	
-	
-	
-	if(tag == "lookatentity" or tag == "last_spawned") then
-		
-		
-		
-		
-		
-		local enti = cyberscript.EntityManager[cyberscript.EntityManager[tag].tag]
-		
-		if(enti ~= nil) then
-			
-			obj = enti
-			
-		end	
-		
-		
-		
-		
-		
-	end
-
-	if(enti ~= nil and enti.primarytag ~= nil) then
-		
-		
-		
-		
-		
-		local enti = cyberscript.EntityManager[enti.primarytag]
-		
-		if(enti ~= nil) then
-			
-			obj = enti
-			
-		end	
-		
-		
-		
-		
-		
-	end
-	
-	if(tag == "mounted_vehicle" ) then
-		
-		if Game['GetMountedVehicle;GameObject'](Game.GetPlayer()) ~= nil then
-			
-			
-			
-			
-			local enti = cyberscript.EntityManager["mounted_vehicle"]
-			if (enti ~= nil) and type(enti.id) ~= "number" then
-				
-				if(enti.id ~= nil and enti.id.hash == Game['GetMountedVehicle;GameObject'](Game.GetPlayer()):GetEntityID().hash) then
-					obj = enti
-				end
-				
-			end	
-			
-			
-			if(obj.id == nil) then
-				obj.id = Game['GetMountedVehicle;GameObject'](Game.GetPlayer()):GetEntityID()
-				obj.tag = "mounted_vehicle"
-				obj.tweak = nil
-				else
-				--		obj.tag = "lookat"
-			end
-			
-		end
-	end
-	
-	
-	
-	return obj
-end
-
-function getTrueEntityFromManager(tag)
-	
-	
-	
-	local enti = cyberscript.EntityManager[tag]
-	
-
-	if(tag == "lookatentity" or tag == "last_spawned") then
-		
-		
-		
-		
-		
-		local enti = cyberscript.EntityManager[cyberscript.EntityManager[tag].tag]
-		
-		if(enti ~= nil) then
-			
-			obj = enti
-			
-		end	
-		
-		
-		
-		
-		
-	end
-
-	if(enti ~= nil and enti.primarytag ~= nil) then
-		
-		
-		
-		
-		
-		local enti = cyberscript.EntityManager[enti.primarytag]
-		
-		if(enti ~= nil) then
-			
-			obj = enti
-			
-		end	
-		
-		
-		
-		
-		
-	end
-
-	if(tag == "mounted_vehicle" ) then
-		
-		if Game['GetMountedVehicle;GameObject'](Game.GetPlayer()) ~= nil then
-			
-			
-			
-			
-			local enti = cyberscript.EntityManager["mounted_vehicle"]
-			if (enti ~= nil) and type(enti.id) ~= "number" then
-				
-				if(enti.id ~= nil and enti.id.hash == Game['GetMountedVehicle;GameObject'](Game.GetPlayer()):GetEntityID().hash) then
-					obj = enti
-				end
-				
-			end	
-			
-			
-			if(obj.id == nil) then
-				obj.id = Game['GetMountedVehicle;GameObject'](Game.GetPlayer()):GetEntityID()
-				obj.tag = "mounted_vehicle"
-				obj.tweak = nil
-				else
-				--		obj.tag = "lookat"
-			end
-			
-		end
-	end
-	
-	
-	if((enti ~= nil) and enti.tag == tag) then
-		return enti
-	end
-	
-	
-	
-	
-end
-
-function setEntityFromManager(tag,obju)
-	
-	
-	
-	
-	cyberscript.EntityManager[tag] = obju
-	
-	
-	
-	
-	
-	
-end
 
 function getExpression(name)
 	
@@ -4349,42 +4146,6 @@ function getExpression(name)
 		
 		
 	end
-	
-end
-
-function getEntityFromManagerById(Id, avoid)
-	local obj = {}
-	obj.id = nil
-	local key = nil
-	for k,v in pairs(cyberscript.EntityManager) do
-		
-		local enti = v
-		
-		if( avoid == false or ((avoid == nil or avoid == true) and k ~= "lookatentity" and k ~= "lookatnpc" and k ~= "last_scanned")) then
-		
-			if type(enti.id) ~= "number" then
-				
-				if(enti.id ~= nil and Id ~= nil and enti.id.hash == Id.hash) then
-					obj = v
-					key = k
-					
-				end
-				
-			end
-
-		end
-		
-		
-		
-		
-		
-	end
-	
-	if(obj.id ~= nil and obj.tag ~= key) then
-		obj = cyberscript.EntityManager[obj.tag]
-	end
-
-	return obj
 	
 end
 
@@ -5346,3 +5107,112 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+--entity manager
+
+
+
+
+function getEntityFromManager(tag)	
+	local obj = {}
+	obj.id = nil
+	
+	
+	local enti = cyberscript.EntityManager[tag]
+	if(enti ~= nil) then
+		
+		if(enti.tag ~= tag) then
+		
+			local enti2 = cyberscript.EntityManager[enti.tag]
+			
+			if(enti ~= nil) then
+				
+				obj = enti2
+				
+			end	
+
+		else
+			obj = enti
+		end
+	end
+	
+	
+	
+	
+	
+	
+	return obj
+end
+
+function getTrueEntityFromManager(tag)
+	
+	
+	
+	local enti = cyberscript.EntityManager[tag]
+	
+
+	if(tag ~= enti.tag) then
+		
+		local enti2 = cyberscript.EntityManager[enti.tag]
+		
+		if(enti2 ~= nil) then
+			
+			return enti2
+			
+		end	
+		
+		
+	else
+
+		return enti
+		
+		
+	end
+
+		
+end
+
+function setEntityFromManager(tag,obju)
+	cyberscript.EntityManager[tag] = obju
+end
+
+
+function getEntityFromManagerById(Id, avoid)
+	local obj = {}
+	obj.id = nil
+	local key = nil
+
+	for k,v in pairs(cyberscript.EntityManager) do
+		
+		local enti = v
+		
+		if type(enti.id) ~= "number" then
+			
+			if(enti.id ~= nil and Id ~= nil and enti.id.hash == Id.hash) then
+				obj = v
+				key = k
+				break
+			end
+			
+		end
+
+	end
+	
+	if(obj.id ~= nil and obj.tag ~= key) then
+		obj = getEntityFromManager(obj.tag)
+	end
+
+	return obj
+	
+end

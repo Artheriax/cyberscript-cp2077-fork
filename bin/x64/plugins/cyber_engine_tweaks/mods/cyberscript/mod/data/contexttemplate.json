@@ -2,6 +2,9 @@
 	"current_district": {
 		"prop": "tag"
 	},
+	"context_props": {
+		"prop": "tag"
+	},
 	"faction": {
 
 		"tag": "tag",

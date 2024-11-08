@@ -927,4 +927,10 @@ return {
 		["value"] = "q00_test_001",
 		["name"] = "tracked_custom_objective"
 	},
+	["in_entity_car"] = {
+		["helper"] = "This trigger will be triggered when you are in a entity car",
+		["helperTitle"] = "Player : In Entity car",
+		["tag"] = "q00_test_001",
+		["name"] = "in_entity_car",
+	},
 }

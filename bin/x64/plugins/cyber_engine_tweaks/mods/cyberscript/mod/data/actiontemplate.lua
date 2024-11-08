@@ -4261,6 +4261,62 @@ return {
 		["helper"] = "This action will unset current time dilatation only for player",
 	},
 
+	["play_several_anim_entity"] = {
+
+		["helper"] = "This action will play chain of animations to entity (anims need to be in same workspot)",
+		["anims"] = {
+
+			{
+				["timer"] = 20,
+				["anim"] = "add__stand__2h_front__01__dynamic",
+				["isinstant"] = false,
+			},
+			{
+				["timer"] = 20,
+				["anim"] = "add__stand__2h_front__01__dynamic",
+				["isinstant"] = false,
+			},
+			{
+				["timer"] = 20,
+				["anim"] = "add__stand__2h_front__01__dynamic",
+				["isinstant"] = false,
+			},
+			{
+				["timer"] = 20,
+				["anim"] = "add__stand__2h_front__01__dynamic",
+				["isinstant"] = false,
+			}
+		
+		},
+		
+		["tag"] = "myshardtag",
+		["helperTitle"] = "Anim : Play severals Anims to Entity (if in same workspot)",
+		["name"] = "play_several_anim_entity",
+	},
+
+	["play_animpack_entity"] = {
+
+		["helper"] = "This action will play an pack of animations to entity",
+	
+		
+		["tag"] = "myshardtag",
+		["helperTitle"] = "Anim : Play Animpack to Entity",
+		["name"] = "play_animpack_entity",
+	},
+
+	["change_play_anim_entity_workspot"] = {
+
+		["helper"] = "This action will change workspot to entity",
+		["workspot"] = "cyberscript_workspot_custom_base",
+		["helperTitle"] = "Anim : Change Workspot to Entity",
+		["workspottag"] = "myworkspot",
+		["tag"] = "myshardtag",
+		["unlockcamera"] = true,
+		["anim"] = "myanim",
+		["isinstant"] = true,
+		["name"] = "change_play_anim_entity_workspot",
+	},
+
 	
 	
 

@@ -1242,6 +1242,13 @@ function FillList(objtype,tabl, datapackname)
 							
 							makeTypeCachedObject(objtype,value,nil,path,datapackname)
 						end
+						elseif(objtype == "animpack") then
+						for key, value in pairs(tabl) do 
+							local path = "scripts/"..objtype.."/"..key
+							rootpath = path
+							
+							makeTypeCachedObject(objtype,value,nil,path,datapackname)
+						end
 						elseif(objtype == "ai") then
 							for key, value in pairs(tabl) do 
 								local path = "scripts/"..objtype.."/"..key

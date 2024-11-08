@@ -99,7 +99,7 @@ if spawnRegion then
 		if(enti ~= nil and entiwk ~= nil) then
 		
 			Game.GetWorkspotSystem():PlayInDeviceSimple(entiwk, enti, unlockcamera, workspot, nil, nil, 0, 1, nil)
-			Game.GetWorkspotSystem():SendJumpToAnimEnt(enti, "stand__hold_johnnys_arm__01", true)
+			Game.GetWorkspotSystem():SendJumpToAnimEnt(enti, "idle_stand", true)
 		end
 	
 	end
@@ -184,7 +184,9 @@ if spawnRegion then
 						Game.GetWorkspotSystem():SendJumpToAnimEnt(enti, anim_cname, isinstant)
 						
 						
-						if(NPC ~= nil) then
+						if(NPC ~= nil and cyberscript.EntityManager[entitytag] ~= nil) then
+
+							local success, response = pcall(function()
 							local entity = {}
 							entity.id = NPC
 							entity.iscodeware = false
@@ -201,7 +203,10 @@ if spawnRegion then
 							entity.spawntimespan = os.time(os.date("!*t"))+0
 							entity.despawntimespan = os.time(os.date("!*t"))+600
 							cyberscript.EntityManager[tag]=entity
-							
+							end)
+							if(success == false) then
+								Cron.Halt(timer)
+							end
 						end
 						
 						
@@ -2228,6 +2233,48 @@ if attitudeRegion then
 		end 
 		
 	end
+
+	function resetFollower(tag)
+		
+		local entity = nil
+		local obj = nil 
+		if(tag =="lookat" and objLook ~= nil) then 
+			
+			entity = objLook
+			obj = getEntityFromManagerById(objLook:GetEntityID())
+			
+			else
+			
+			
+			obj = getEntityFromManager(tag)
+			
+			entity = Game.FindEntityByID(obj.id)
+			
+			
+		end
+		
+		if(entity ~= nil) then
+			local handle = entity
+			local currentRole = handle:GetAIControllerComponent():GetAIRole()
+		  
+			if handle.isPlayerCompanionCached and currentRole:IsA('AIFollowerRole') and not handle:IsCrowd() then
+			  
+				currentRole:OnRoleCleared(handle)
+		  
+				local noRole = AINoRole.new()
+				AIHumanComponent.SetCurrentRole(handle, noRole)
+		  
+				local sensePreset = handle:GetRecord():SensePreset():GetID()
+				SenseComponent.RequestPresetChange(handle, sensePreset, true)
+		  
+				handle.isPlayerCompanionCached = false
+				handle.isPlayerCompanionCachedTimeStamp = 0
+			 
+			end
+			
+		end 
+		
+	end
 		
 	function setPassiveAgainst(tag, target)
 		
@@ -2337,6 +2384,8 @@ if attitudeRegion then
 			-- AIC:SetAIRole(aiRole)
 			-- enti.movePolicies:Toggle(true)
 			
+			targetAttAgent:SetAttitudeTowards(targets:GetAttitudeAgent(), Enum.new("EAIAttitude", "AIA_Neutral"))
+
 			targetAttAgent:SetAttitudeTowards(targets:GetAttitudeAgent(), Enum.new("EAIAttitude", "AIA_Friendly"))
 			
 			print("fruend")
@@ -3427,8 +3476,7 @@ if vehiculeRegion then
 				if(vehiculeobj.lastcmd ~= nil) then
 					vehicule:GetAIComponent():CancelCommand(vehiculeobj.lastcmd);
 					vehicule:GetAIComponent():StopExecutingCommand(vehiculeobj.lastcmd,true)
-					cyberscript.EntityManager[vehiculeobj.tag].lastcmd = nil
-					
+					vehiculeobj.lastcmd = nil
 				end
 				
 				
@@ -3473,8 +3521,12 @@ if vehiculeRegion then
 				if(vehiculeobj.lastcmd ~= nil) then
 					
 					VehicleCancelLastCommand(vehiculeobj.tag)
-					cyberscript.EntityManager[vehiculeobj.tag].lastcmd = cmd
 				end
+				
+				local vehiculeobjs =  getEntityFromManager(vehiculeobj.tag)
+				vehiculeobjs.lastcmd = cmd
+			
+					
 
 
 			end
