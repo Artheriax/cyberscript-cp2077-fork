@@ -100,6 +100,11 @@ if spawnRegion then
 		
 			Game.GetWorkspotSystem():PlayInDeviceSimple(entiwk, enti, unlockcamera, workspot, nil, nil, 0, 1, nil)
 			Game.GetWorkspotSystem():SendJumpToAnimEnt(enti, "idle_stand", true)
+					
+		
+			cyberscript.EntityManager[entitytag].animation = "idle_stand"
+							
+			cyberscript.EntityManager[entitytag].workspot_name = workspot
 		end
 	
 	end
@@ -112,7 +117,8 @@ if spawnRegion then
 		if(enti ~= nil) then
 			print(tostring(isinstant))
 			Game.GetWorkspotSystem():SendJumpToAnimEnt(enti, anim_cname, isinstant)
-		
+			cyberscript.EntityManager[entitytag].animation = anim_cname
+							
 		end
 	
 	end
@@ -192,6 +198,8 @@ if spawnRegion then
 							entity.iscodeware = false
 							local tag = entitytag.."_workspot"
 							cyberscript.EntityManager[entitytag].workspot = tag
+							cyberscript.EntityManager[entitytag].animation = anim_cname
+							cyberscript.EntityManager[entitytag].workspot_name = workspot
 							entity.tag =tag
 							entity.tweak = anim_cname
 							entity.isprevention = false
@@ -227,65 +235,6 @@ if spawnRegion then
 		
 	end
 	
-	
-	function spawnWidgetEnt(tag, x, y ,z)
-		
-		
-		
-		local spawnTransform = Game.GetPlayer():GetWorldTransform()
-		local pos = Game.GetPlayer():GetWorldPosition()
-		local heading = Game.GetPlayer():GetWorldForward()
-		local angles = GetSingleton('Quaternion'):ToEulerAngles(Game.GetPlayer():GetWorldOrientation())
-		local offset = 1
-		local postp = Vector4.new( x, y, z,1)
-		
-		spawnTransform:SetPosition(postp)	
-		spawnTransform:SetOrientationEuler(EulerAngles.new(0, 0, angles.yaw - 180))
-		
-		
-		local NPC = exEntitySpawner.Spawn([[base\cyberscript\entity\inkwidget.ent]], spawnTransform, '')
-		----print("Spawned "..entname)
-		Cron.Every(0.1, {tick = 1}, function(timer)
-			local ent = Game.FindEntityByID(NPC)
-			if ent then
-				-- stand_wall_lean180__rh_phone__ow__01
-				
-				
-				if(NPC ~= nil) then
-					local entity = {}
-					entity.id = NPC
-					local tag = tag
-					entity.iscodeware = false
-					entity.tag =tag
-					entity.tweak = [[base\cyberscript\entity\inkwidget.ent]]
-					entity.isprevention = false
-					entity.scriptlevel = 0
-					entity.name = tag
-					entity.isMP = false
-					entity.isitem = true
-					entity.spawntimespan = os.time(os.date("!*t"))+0
-					entity.despawntimespan = os.time(os.date("!*t"))+300
-					cyberscript.EntityManager[tag]=entity
-					
-				end
-				
-				
-				
-				Cron.Halt(timer)
-			end
-			timer.tick = timer.tick + 1
-			if timer.tick > 300 then
-					Cron.Halt(timer)
-					error("Couldn't spawn correctly the entity"..tag)
-				end
-		end)
-		
-		
-		
-	end
-	
-	
-	
 	function changeWorkSpotAnims(entitytag,anim_cname,isinstant)
 		
 		local obj = getEntityFromManager(entitytag)
@@ -298,6 +247,8 @@ if spawnRegion then
 			
 			
 			Game.GetWorkspotSystem():SendJumpToAnimEnt(enti, anim_cname, isinstant)
+
+			cyberscript.EntityManager[entitytag].animation = anim_cname
 		end
 		
 	end
@@ -423,7 +374,7 @@ if spawnRegion then
 				end
 				npcSpec.appearanceName = appearance or ""
 				npcSpec.position = postp
-				npcSpec.orientation = rotation
+				npcSpec.orientation = GetSingleton('EulerAngles'):ToQuat(rotation)
 				npcSpec.persistState = persistState or false
 				npcSpec.persistSpawn = persistSpawn or false
 				npcSpec.alwaysSpawned = AlwaysSpawned or false
@@ -530,6 +481,62 @@ if spawnRegion then
 	
 	
 	
+		
+	function spawnWidgetEnt(tag, x, y ,z)
+		
+		
+		
+		local spawnTransform = Game.GetPlayer():GetWorldTransform()
+		local pos = Game.GetPlayer():GetWorldPosition()
+		local heading = Game.GetPlayer():GetWorldForward()
+		local angles = GetSingleton('Quaternion'):ToEulerAngles(Game.GetPlayer():GetWorldOrientation())
+		local offset = 1
+		local postp = Vector4.new( x, y, z,1)
+		
+		spawnTransform:SetPosition(postp)	
+		spawnTransform:SetOrientationEuler(EulerAngles.new(0, 0, angles.yaw - 180))
+		
+		
+		local NPC = exEntitySpawner.Spawn([[base\cyberscript\entity\inkwidget.ent]], spawnTransform, '')
+		----print("Spawned "..entname)
+		Cron.Every(0.1, {tick = 1}, function(timer)
+			local ent = Game.FindEntityByID(NPC)
+			if ent then
+				-- stand_wall_lean180__rh_phone__ow__01
+				
+				
+				if(NPC ~= nil) then
+					local entity = {}
+					entity.id = NPC
+					local tag = tag
+					entity.iscodeware = false
+					entity.tag =tag
+					entity.tweak = [[base\cyberscript\entity\inkwidget.ent]]
+					entity.isprevention = false
+					entity.scriptlevel = 0
+					entity.name = tag
+					entity.isMP = false
+					entity.isitem = true
+					entity.spawntimespan = os.time(os.date("!*t"))+0
+					entity.despawntimespan = os.time(os.date("!*t"))+300
+					cyberscript.EntityManager[tag]=entity
+					
+				end
+				
+				
+				
+				Cron.Halt(timer)
+			end
+			timer.tick = timer.tick + 1
+			if timer.tick > 300 then
+					Cron.Halt(timer)
+					error("Couldn't spawn correctly the entity"..tag)
+				end
+		end)
+		
+		
+		
+	end
 	
 	
 	

@@ -4300,6 +4300,7 @@ return {
 	
 		["parallele"] = false,
 		["tag"] = "myshardtag",
+		["packtag"] = "packtagtag",
 		["helperTitle"] = "Anim : Play Animpack to Entity",
 		["name"] = "play_animpack_entity",
 	},

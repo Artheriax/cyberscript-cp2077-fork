@@ -7984,6 +7984,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 							rot.roll = action.roll
 							rot.pitch = action.pitch
 							rot.yaw = action.yaw
+						
 							end
 
 							spawnNPC(chara,action.appearance, tag, position.x, position.y ,position.z,action.spawnlevel,action.use_police_prevention_system,false,action.scriptlevel,action.useEntpath,rot,action.despawntimer,action.usecodeware,action.persiststate,action.persistspawn,action.alwaysspawned,action.spawninview,action.dontregister,action.npcname,action.isboss)
@@ -10690,7 +10691,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 					local actiontemp = {}
 					for i,anim in ipairs(action.anims) do
 							local changewk =  false
-
+							checkContext(anim)
 							if(animpack.anims[i-1]~= nil) then
 								
 								if
@@ -10698,6 +10699,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 								(cyberscript.EntityManager[entitytag].workspot_name ~= nil and cyberscript.EntityManager[entitytag].workspot_name ~= anim.workspot)
 								then
 									changewk = true
+									print( anim.anim.." changewk")
 								end
 
 							end
@@ -10748,21 +10750,22 @@ function executeAction(action,tag,parent,index,source,executortag)
 				end
 
 				if action.name == "play_animpack_entity" then
-					
+					print( "play_animpack_entity")
 					if(cyberscript.cache["animpack"][action.packtag] ~= nil) then
 						local animpack = cyberscript.cache["animpack"][action.packtag].data
 
 						local actiontemp = {}
 						for i,anim in ipairs(animpack.anims) do
 								local changewk =  false
-
+								checkContext(anim)
 								if(animpack.anims[i-1]~= nil) then
 									
 									if
 									(animpack.anims[i-1].workspot ~= nil and animpack.anims[i-1].workspot ~= anim.workspot) or
-									(cyberscript.EntityManager[entitytag].workspot_name ~= nil and cyberscript.EntityManager[entitytag].workspot_name ~= anim.workspot)
+									(cyberscript.EntityManager[action.tag].workspot_name ~= nil and cyberscript.EntityManager[action.tag].workspot_name ~= anim.workspot)
 									then
 										changewk = true
+										print( anim.anim.." changewk")
 									end
 
 								end
@@ -10783,13 +10786,13 @@ function executeAction(action,tag,parent,index,source,executortag)
 																		
 								end
 
-
+							
 								local myaction = deepcopy(cyberscript.actiontemplate["change_anim_entity"],nil)
 								myaction.tag = action.tag
 								myaction.anim = anim.anim
 								myaction.isinstant = anim.isinstant
 								
-								
+						
 								table.insert(actiontemp,myaction)
 
 								local myaction = deepcopy(cyberscript.actiontemplate["wait_tick"],nil)
@@ -10841,7 +10844,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 				if action.name == "enter_in_workspot" then
 					
 					
-					enterInWorkspot(action.tag,action.workspottag,action.workspot,action.unlockcamera)
+					enterInWorkspotenterInWorkspot(action.tag,action.workspottag,action.workspot,action.unlockcamera)
 					
 				end
 				
