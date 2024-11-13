@@ -3917,7 +3917,9 @@ function executeAction(action,tag,parent,index,source,executortag)
 			
 			if miscregion then
 				if(action.name == "set_fact") then
-					Game.SetDebugFact(action.value, action.score)
+					
+					Game.GetQuestsSystem():SetFactStr(action.value, action.score)
+					
 				end
 				if(action.name == "refresh_shard_cache") then
 					local activeData = CodexListSyncData.new()
@@ -10844,7 +10846,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 				if action.name == "enter_in_workspot" then
 					
 					
-					enterInWorkspotenterInWorkspot(action.tag,action.workspottag,action.workspot,action.unlockcamera)
+					enterInWorkspot(action.tag,action.workspottag,action.workspot,action.unlockcamera)
 					
 				end
 				

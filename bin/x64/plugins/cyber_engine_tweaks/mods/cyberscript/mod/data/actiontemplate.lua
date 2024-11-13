@@ -4319,6 +4319,14 @@ return {
 	},
 
 	
+	["set_fact"] = {
+
+		["helper"] = "This action will change Game Fact to score",
+		["helperTitle"] = "Game : Change Fact",
+		["value"] = "judy_romanceable",
+		["score"] = 1,
+		["name"] = "set_fact"
+	},
 	
 
 	
