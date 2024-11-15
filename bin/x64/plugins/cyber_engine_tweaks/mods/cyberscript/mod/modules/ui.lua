@@ -1112,9 +1112,9 @@ function makefavoritesetting()
 	defaultinput["cyberscriptOpenFavorite"]["gamepad"] = {}
 	for i=1,3 do
 	
-		defaultinput["cyberscriptOpenFavorite"]["keyboard"]["key_"..i] = "IK_X"
+		defaultinput["cyberscriptOpenFavorite"]["keyboard"]["key_"..i] = "IK_PageUp"
 		defaultinput["cyberscriptOpenFavorite"]["keyboard"]["hold_"..i] = false
-		defaultinput["cyberscriptOpenFavorite"]["gamepad"]["key_"..i] = "IK_X"
+		defaultinput["cyberscriptOpenFavorite"]["gamepad"]["key_"..i] = "IK_PageUp"
 		defaultinput["cyberscriptOpenFavorite"]["gamepad"]["hold_"..i] = false
 	
 	end
@@ -1636,9 +1636,9 @@ function makeNativeSettings()
 		defaultinput["cyberscriptOpenGroup"]["gamepad"] = {}
 		for i=1,3 do
 		
-			defaultinput["cyberscriptOpenGroup"]["keyboard"]["key_"..i] = "IK_Y"
+			defaultinput["cyberscriptOpenGroup"]["keyboard"]["key_"..i] = "IK_PageDown"
 			defaultinput["cyberscriptOpenGroup"]["keyboard"]["hold_"..i] = false
-			defaultinput["cyberscriptOpenGroup"]["gamepad"]["key_"..i] = "IK_Y"
+			defaultinput["cyberscriptOpenGroup"]["gamepad"]["key_"..i] = "IK_PageDown"
 			defaultinput["cyberscriptOpenGroup"]["gamepad"]["hold_"..i] = false
 		
 		end

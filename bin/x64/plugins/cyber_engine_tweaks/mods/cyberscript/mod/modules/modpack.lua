@@ -107,22 +107,26 @@ function ImportDataPack()
 				
 		-- we check if there is an existing cache
 		
-		
-		local mod =  GetMod(u)
-		local datapack = {}
+		local success, message =  pcall(function()
+			local mod =  GetMod(u)
+			local datapack = {}
 
-		if mod ~= nil then 
-			
-			datapack = mod.compile()
-			arrayDatapack[u] = datapack
-			arrayDatapack[u].enabled= true
-			logme(1,"Cyberscript : "..u.." Registred !")
-			
-		else 
-			print("ERROR : "..u.." mod not found !")
+			if mod ~= nil then 
 				
+				datapack = mod.compile()
+				if(datapack == nil)then error("Cyberscript : FAILED TO COMPILE "..u,2) end
+				arrayDatapack[u] = datapack
+				arrayDatapack[u].enabled= true
+				print("Cyberscript : "..u.." compiled !")
+				
+			else 
+				print("ERROR : "..u.." mod not found !")
+					
+			end
+		end)
+		if success == false then
+			print(message)
 		end
-
 		
 	
 		
@@ -154,11 +158,11 @@ function ImportDataPackSingle(tag)
 		datapack = mod.compile()
 		arrayDatapack[tag] = datapack
 		arrayDatapack[tag].enabled= true
-		logme(1,"Cyberscript : "..tag.." Registred !")
+		print("Cyberscript : "..tag.." compiled !")
 		
 	else 
-		print("ERROR : "..tag.." mod not found !")
-			
+		
+		print("Cyberscript : FAILED TO COMPILE "..u,2)	
 	end
 	
 end
@@ -625,7 +629,7 @@ function LoadDataPackCache()
 						
 						
 							if(arrayDatapack[k][objtype] ~= nil) then
-								logme(1,"Loading "..objtype.." for "..k,true)
+								logme(5,"Loading "..objtype.." for "..k,true)
 								try {
 									function()
 								FillList(objtype,arrayDatapack[k][objtype],k)
@@ -1296,9 +1300,7 @@ function makeTypeCachedObject(objtype,value,field,path,datapackname)
 		cyberscript.cache[objtype][tag].datapack = datapackname
 		cyberscript.cache[objtype][tag].scripttype = objtype
 
-		if(objtype == "setting") then
-			logme(1,dump(value),true)
-		end
+	
 
 end
 
@@ -1390,8 +1392,8 @@ function FillCharacterArchive()
 	end
 	
 	
-	print("Making Character "..ent.data.name)
-	print("Falt Character "..GameDump(TweakDB:GetFlat(ent.data.name..".entityTemplatePath")))
+	-- print("Making Character "..ent.data.name)
+	-- print("Falt Character "..GameDump(TweakDB:GetFlat(ent.data.name..".entityTemplatePath")))
 	local parent = {}
 	for i,v in ipairs(cyberscript.entities) do
 	
@@ -1431,7 +1433,7 @@ function loadQuestsToUI()
 		local data = {}
 		checkContext(questos)
 		
-		print(k)
+		
 		
 		data.id = questos.tag
 		data.title = getLang(questos.title)

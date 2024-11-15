@@ -794,7 +794,7 @@ function inGameInit() -- init some function after save loaded
 	choiceHubData.active =true 
 	choiceHubData.flags = EVisualizerDefinitionFlags.Undefined
 	choiceHubData.title = "possibleInteractList" --'Test Interaction Hub'
-	
+	cyberscript.language = Game.GetSettingsSystem():GetVar("/language", "OnScreen"):GetValue().value
 	loadUIsetting()
 	
 	
