@@ -388,7 +388,7 @@ if spawnRegion then
 				end
 				textdump.appearanceName = appearance or ""
 				textdump.position = postp
-				textdump.orientation = rotation
+				textdump.orientation = GetSingleton('EulerAngles'):ToQuat(rotation)
 				textdump.persistState = persistState or false
 				textdump.persistSpawn = persistSpawn or false
 				textdump.alwaysSpawned = AlwaysSpawned or false
@@ -2667,7 +2667,7 @@ if vehiculeRegion then
 						npcSpec.recordID = chara
 						npcSpec.appearanceName = appearance
 						npcSpec.position = postp
-						npcSpec.orientation = EulerAngles.new(rotation.roll,rotation.pitch,rotation.yaw)
+						npcSpec.orientation = GetSingleton('EulerAngles'):ToQuat(EulerAngles.new(rotation.roll,rotation.pitch,rotation.yaw))
 						npcSpec.persistState = persistState or false
 						npcSpec.persistSpawn = persistSpawn or false
 						npcSpec.alwaysSpawned = AlwaysSpawned or false
