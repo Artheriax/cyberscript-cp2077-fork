@@ -1,6 +1,6 @@
 logme(1,"CyberScript: see module loaded")
 cyberscript.module = cyberscript.module +1
-
+vitesseParLettre = 1 / 12
 
 function checkTrigger(trigger)
 	
@@ -7273,20 +7273,27 @@ function executeAction(action,tag,parent,index,source,executortag)
 								candotext = true
 							end
 							
-							
+							local tempsMoyen = calcTimebyLetter( countLetter(dialogLine.text), vitesseParLettre)
+								
+
 							
 							
 							
 							if(candotext == true) then
 								dialogLine.isPersistent  = true
-								dialogLine.duration  = math.ceil(cyberscript.cache["sound"][action.value].data.duration)
+								dialogLine.duration  = math.ceil(tempsMoyen)
 								
 								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
 									GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
 								end
 								local temp = os.time(os.date("!*t"))+0 
 								local nexttemp = temp
-								nexttemp =nexttemp +  math.ceil(cyberscript.cache["sound"][action.value].data.duration)
+
+			
+								
+
+
+								nexttemp =nexttemp +  math.ceil(tempsMoyen)
 								action.tick = nexttemp
 								
 								local path = cyberscript.cache["sound"][action.value].data
@@ -7299,7 +7306,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 								
 								
 								if(action.target == nil) then
-									PlaySound(path,isradio,needrepeat)
+									PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									else
 									local obj = getEntityFromManager(action.target)
 									if(obj ~= nil) then
@@ -7308,17 +7315,17 @@ function executeAction(action,tag,parent,index,source,executortag)
 										if(enti ~= nil) then
 											
 											local actionb = deepcopy(cyberscript.actiontemplate["fake_lips_sync"])
-											actionb.duration = math.floor(cyberscript.cache["sound"][action.value].data.duration)
+											actionb.duration = math.floor(tempsMoyen)
 											actionb.tag = action.target
 											local actionlist = {}
 											actionlist[1] = actionb
 											runActionList(actionlist, "fake_lips_sync_async_action_"..tostring(math.random(1,987987)), "see",false,nil)
-											PlaySound(path,isradio,needrepeat,enti)
+											PlaySoundAtEntity(path,isradio,needrepeat,action.target,tempsMoyen,action.volume)
 											else
-											PlaySound(path,isradio,needrepeat)
+											PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 										end
 										else
-										PlaySound(path,isradio,needrepeat)
+										PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									end
 								end
 								result = false
@@ -7382,19 +7389,24 @@ function executeAction(action,tag,parent,index,source,executortag)
 							end
 							
 							
+							local tempsMoyen = calcTimebyLetter(countLetter(dialogLine.text), vitesseParLettre)
+								
 							
 							
 							
 							if(candotext == true) then
 								dialogLine.isPersistent  = true
-								dialogLine.duration  = math.ceil(cyberscript.cache["sound"][tag].data.duration)
+								dialogLine.duration  = math.ceil(tempsMoyen)
 								
 								if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Cinematic"):GetValue() == true) then
 									GameController["SubtitlesGameController"]:SpawnDialogLine(dialogLine)
 								end
 								local temp = os.time(os.date("!*t"))+0 
 								local nexttemp = temp
-								nexttemp =nexttemp +  math.ceil(cyberscript.cache["sound"][tag].data.duration)
+
+							
+
+								nexttemp =nexttemp +  math.ceil(tempsMoyen)
 								action.tick = nexttemp
 								
 								local path = cyberscript.cache["sound"][tag].data
@@ -7408,7 +7420,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 								
 								
 								if(action.target == nil) then
-									PlaySound(path,isradio,needrepeat)
+									PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									else
 									local obj = getEntityFromManager(action.target)
 									if(obj ~= nil) then
@@ -7417,17 +7429,17 @@ function executeAction(action,tag,parent,index,source,executortag)
 										if(enti ~= nil) then
 											
 											local actionb = deepcopy(cyberscript.actiontemplate["fake_lips_sync"])
-											actionb.duration = math.floor(cyberscript.cache["sound"][action.value].data.duration)
+											actionb.duration = math.floor(tempsMoyen)
 											actionb.tag = action.target
 											local actionlist = {}
 											actionlist[1] = actionb
 											runActionList(actionlist, "fake_lips_sync_async_action_"..tostring(math.random(1,987987)), "see",false,nil)
-											PlaySound(path,isradio,needrepeat,enti)
+											PlaySoundAtEntity(path,isradio,needrepeat,enti,tempsMoyen,action.volume)
 											else
-											PlaySound(path,isradio,needrepeat)
+											PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 										end
 										else
-										PlaySound(path,isradio,needrepeat)
+										PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									end
 								end
 								
@@ -7558,7 +7570,6 @@ function executeAction(action,tag,parent,index,source,executortag)
 				end
 				
 				if(action.name == "play_custom_sound_with_subtitle_as_chat") then 
-					
 					if(cyberscript.cache["sound"][action.value] ~= nil) then
 						
 						if(GameController["ChattersGameController"] ~= nil) then
@@ -7596,16 +7607,21 @@ function executeAction(action,tag,parent,index,source,executortag)
 									dialogLine.speakerName = obj.name
 									candotext = true
 								end
+								
+								local tempsMoyen = calcTimebyLetter(countLetter(dialogLine.text), vitesseParLettre)
+								
 								if(candotext == true) then
 									dialogLine.isPersistent  = false
-									dialogLine.duration  = math.ceil(cyberscript.cache["sound"][action.value].data.duration)
+									dialogLine.duration  = math.ceil(tempsMoyen)
 									
 									if(Game.GetSettingsSystem():GetVar("/accessibility/subtitles", "Overheads"):GetValue() == true) then
 										GameController["ChattersGameController"]:SpawnDialogLine(dialogLine)
 									end
 									local temp = os.time(os.date("!*t"))+0 
 									local nexttemp = temp
-									nexttemp =nexttemp +  math.ceil(cyberscript.cache["sound"][action.value].data.duration)
+									
+									
+									nexttemp =nexttemp +  math.ceil(tempsMoyen)
 									action.tick = nexttemp
 									
 									local path = cyberscript.cache["sound"][action.value].data
@@ -7619,7 +7635,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 									
 									
 									if(action.target == nil) then
-									PlaySound(path,isradio,needrepeat)
+									PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									else
 									local obj = getEntityFromManager(action.target)
 									if(obj ~= nil) then
@@ -7628,17 +7644,16 @@ function executeAction(action,tag,parent,index,source,executortag)
 										if(enti ~= nil) then
 											
 											local actionb = deepcopy(cyberscript.actiontemplate["fake_lips_sync"])
-											actionb.duration = math.floor(cyberscript.cache["sound"][action.value].data.duration)
+											actionb.duration = math.floor(tempsMoyen)
 											actionb.tag = action.target
 											local actionlist = {}
 											actionlist[1] = actionb
 											runActionList(actionlist, "fake_lips_sync_async_action_"..tostring(math.random(1,987987)), "see",false,nil)
-											PlaySound(path,isradio,needrepeat,enti)
-											else
-											PlaySound(path,isradio,needrepeat)
+											PlaySoundAtEntity(path,isradio,needrepeat,action.target,tempsMoyen,action.volume)											else
+											PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 										end
 										else
-										PlaySound(path,isradio,needrepeat)
+										PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									end
 								end
 									

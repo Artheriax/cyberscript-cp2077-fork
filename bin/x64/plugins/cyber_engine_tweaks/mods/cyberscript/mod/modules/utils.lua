@@ -2307,3 +2307,11 @@ function RemoveEffectPlayer(value)
 		local seID = TweakDBID.new(value);
 		Game.GetStatusEffectSystem():RemoveStatusEffect(player:GetEntityID(), seID)
 end
+
+function calcTimebyLetter(nombreLettres, vitesseParLettre)
+    return nombreLettres * vitesseParLettre
+end
+
+function countLetter(phrase)
+    return string.gsub(phrase, "%s+", ""):len()
+end

@@ -591,6 +591,7 @@ return {
 			"mysound3",
 		},
 		["target"] = "judy",
+		["volume"] = 1
 	},
 	["play_custom_sound_with_subtitle"] = {
 		["type"] = 1,
@@ -601,6 +602,7 @@ return {
 		["name"] = "play_custom_sound_with_subtitle",
 		["value"] = "mysound1",
 		["target"] = "judy",
+		["volume"] = 1
 	},
 	
 	["play_custom_sound_with_subtitle_as_chat"] = {
@@ -612,6 +614,7 @@ return {
 		["name"] = "play_custom_sound_with_subtitle_as_chat",
 		["value"] = "mysound1",
 		["type"] = 1,
+		["volume"] = 1
 		
 	},
 	["unlock_mission"] = {
@@ -2252,9 +2255,9 @@ return {
 		["helper"] = "This action will set custom remaning time for metro TV display",
 	},
 	["stop_camera"] = {
-		["helper"] = "This action will delete an camera object ",
+		["helper"] = "This action will desactivate an camera object ",
 		["tag"] = "mycamera",
-		["helperTitle"] = "UI : Delete Camera",
+		["helperTitle"] = "UI : Desactivate Camera",
 		["name"] = "stop_camera",
 	},
 	["move_camera"] = {

@@ -25,6 +25,10 @@ function mainThread(active)-- update event when mod is ready and in game (main t
 			if(GameController["SubtitlesGameController"] ~= nil) then
 				pcall(function() GameController["SubtitlesGameController"]:Cleanup() end)
 			end
+
+			if(GameController["ChattersGameController"] ~= nil) then
+				pcall(function() GameController["ChattersGameController"]:Cleanup() end)
+			end
 			
 			if(open1menu == nil) then
 				
