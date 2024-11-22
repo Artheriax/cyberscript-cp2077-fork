@@ -7305,7 +7305,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 								if action.needrepeat ~= nil then needrepeat = action.needrepeat end
 								
 								
-								if(action.target == nil) then
+								if(action.target == nil or action.target == "player") then
 									PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									else
 									local obj = getEntityFromManager(action.target)
@@ -7419,7 +7419,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 								
 								
 								
-								if(action.target == nil) then
+								if(action.target == nil or action.target == "player") then
 									PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									else
 									local obj = getEntityFromManager(action.target)
@@ -7634,7 +7634,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 									
 									
 									
-									if(action.target == nil) then
+									if(action.target == nil or action.target == "player") then
 									PlaySound(path,isradio,needrepeat,nil,tempsMoyen,action.volume)
 									else
 									local obj = getEntityFromManager(action.target)
