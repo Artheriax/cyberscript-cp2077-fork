@@ -74,6 +74,7 @@ function ModInitialisation()
 	arrayUserInput = {
 		["cyberscriptOpenGroup"] =
 			{
+				["repeatable"]=false,
 				["keyboard"]=
 					{
 						["key_1"] = "IK_Pad_DigitLeft", -- Key 1' keycode of the "mkbBinding"
@@ -196,6 +197,7 @@ function SaveLoading()
 	arrayUserInput = {
 		["cyberscriptOpenGroup"] =
 			{
+				["repeatable"]=false,
 				["keyboard"]=
 					{
 						["key_1"] = "IK_Pad_DigitLeft", -- Key 1' keycode of the "mkbBinding"

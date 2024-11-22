@@ -375,6 +375,7 @@ end
 function createdefaultOption(tag,maxkey)
 	local defaultinput = {}
 	defaultinput[tag] = {}
+	defaultinput[tag]["repeatable"] = false
 	defaultinput[tag]["keyboard"] = {}
 	defaultinput[tag]["gamepad"] = {}
 	for i=1,maxkey do
@@ -1012,7 +1013,7 @@ function buildnativesetting()
 					info.maxKeysDescription = getLang("setting_max_key_desc")
 					info.nativeSettingsPath = subcat -- Native settings path for where to add the bindigs options, if it is a multikey binding it has to be a seperate subcategory
 					info.defaultOptions = createdefaultOption(setting.tag,setting.maxkeys) -- Table containing the default options
-					
+					info.repeatable = setting.repeatable or false
 					if(arrayUserInput[info.id] ~= nil) then
 						info.savedOptions = {}
 						info.savedOptions[info.id] = {}
@@ -1105,6 +1106,7 @@ function makefavoritesetting()
 	info.maxKeysLabel = getLang("setting_max_key") -- Label for the binding's key amount slider
 	info.maxKeysDescription = getLang("setting_max_key_desc")
 	info.nativeSettingsPath = "/CSKEYBIND/favorite" -- Native settings path for where to add the bindigs options, if it is a multikey binding it has to be a seperate subcategory
+	info.repeatable = false
 	-- Table containing the default options
 	local defaultinput = {}
 	defaultinput["cyberscriptOpenFavorite"] = {}
@@ -1628,6 +1630,7 @@ function makeNativeSettings()
 		info.maxKeys = 3 -- Maximum amount of keys for this binding, shows a slider if it is bigger than 1
 		info.maxKeysLabel = getLang("setting_max_key") -- Label for the binding's key amount slider
 		info.maxKeysDescription = getLang("setting_max_key_desc")
+		info.repeatable = false
 		info.nativeSettingsPath = "/CSKEYBIND/gameplay" -- Native settings path for where to add the bindigs options, if it is a multikey binding it has to be a seperate subcategory
 		 -- Table containing the default options
 		local defaultinput = {}

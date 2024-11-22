@@ -21,6 +21,7 @@ local function handleInput(event)
     if input.listeningKeybindWidget and key:find("IK_Pad") and action == "IACT_Release" then -- OnKeyBindingEvent has to be called manually for gamepad inputs, while there is a keybind widget listening for input
         input.listeningKeybindWidget:OnKeyBindingEvent(KeyBindingEvent.new({keyName = key}))
         input.listeningKeybindWidget = nil
+    
     elseif input.listeningKeybindWidget and action == "IACT_Release" then -- Key was bound, by keyboard
         input.listeningKeybindWidget = nil
     end
@@ -59,24 +60,41 @@ function input.onUpdate(deltaTime)
     for key, binding in pairs(input.bindings[currentControllerid]) do
         local allPressed = true
         for _, keyInfo in pairs(binding.keys) do
-            if not input.activeKeys[keyInfo[1]] or (input.activeKeys[keyInfo[1]] and keyInfo[2] and not (input.activeKeys[keyInfo[1]] > holdTime)) then
+            if  not input.activeKeys[keyInfo[1]] or (input.activeKeys[keyInfo[1]] and keyInfo[2] and not (input.activeKeys[keyInfo[1]] > holdTime) ) then
                 allPressed = false
+               
                 break
             end
         end
 
-        if allPressed then
+        -- if allPressed then
          
-			 for _, key in pairs(binding.keys) do
+		-- 	 for _, key in pairs(binding.keys) do
 					
-				if not key[3] then
-					input.activeKeys[key[1]] = nil
+		-- 		if (not key[3]) or (not binding.repeatable) then
+		-- 			input.activeKeys[key[1]] = nil
 					
-				end
+		-- 		end
                 
+        --     end
+        --     logme(3,"Cyberscript Keybinding : Event fired for "..key)
+        --     binding.callback()
+        -- end
+
+
+        if allPressed then
+            
+            if not binding.repeatable then
+                for _, key in pairs(binding.keys) do
+                    if (not key[3]) or (not binding.repeatable) then
+                        input.activeKeys[key[1]] = nil
+                    end
+                end
             end
-            logme(3,"Cyberscript Keybinding : Event fired for "..key)
+               
+            logme(3, "Cyberscript Keybinding : Event fired for " .. key)
             binding.callback()
+          
         end
     end
 end
@@ -114,6 +132,7 @@ function input.createBindingInfo(nativeSettingsPath, keybindLabel, isHoldLabel, 
         maxKeysLabel = maxKeysLabel or "",
         maxKeysDescription = maxKeysDescription or "",
         supportsHold = supportsHold or false,
+        repeatable = false,
 		forceHold = forceHold or false,
         defaultOptions = defaultOptions or {},
         savedOptions = savedOptions or {},
@@ -139,10 +158,14 @@ local function addKeybind(info, index, nativeSettings) -- Add single keybind wid
         [1] = info.savedOptions[info.id][currentControllerid][numID], -- Key code
         [2] = info.savedOptions[info.id][currentControllerid][holdID], -- Is hold
 		[3] = info.savedOptions[info.id][currentControllerid][forceholdID] -- Is forceHold
+        
     }
     if(input.nuiTables[info.id] == nil) then input.nuiTables[info.id] = {} end
     if(input.nuiTables[info.id][currentControllerid] == nil) then input.nuiTables[info.id][currentControllerid] = {} end
-    
+    if(input.nuiTables[info.id]["repeatable"] == nil) then input.nuiTables[info.id]["repeatable"] = info.repeatable end
+
+
+
     input.nuiTables[info.id][currentControllerid][numID] = nativeSettings.addKeyBinding(info.nativeSettingsPath,
     "Key # ".. numberText, info.keybindDescription,
     info.savedOptions[info.id][currentControllerid][numID], info.defaultOptions[info.id][currentControllerid][numID],
@@ -176,7 +199,7 @@ function input.addNativeSettingsBinding(info) -- Add combined hotkey widget from
     local maxID = "keys"
    
     
-    input.bindings[currentControllerid][info.id] = {callback = info.callback, keys = {}} -- Binding information contains callback and keys with hold+key data
+    input.bindings[currentControllerid][info.id] = {callback = info.callback, keys = {}, repeatable=info.repeatable} -- Binding information contains callback and keys with hold+key data
 
    
     if not info.savedOptions[info.id][currentControllerid][maxID] then 

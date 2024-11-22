@@ -72,156 +72,165 @@ function mainThread(active)-- update event when mod is ready and in game (main t
 		
 		if mainrefreshstep1 then
 			--AutoAmbush (disable ambush event when MainQuest or SideQuest is active)
-		if (AutoAmbush == 1) then 
-			-- MainQuest = 0,
-			-- SideQuest = 1,
-			-- MinorQuest = 2,
-			-- StreetStory = 3,
-			-- Contract = 4,
-			-- VehicleQuest = 5
-			local objective = Game.GetJournalManager():GetTrackedEntry()
-			if objective ~= nil then
-				local phase = Game.GetJournalManager():GetParentEntry(objective)
-				local quest = Game.GetJournalManager():GetParentEntry(phase)
-				
-				if(string.match(tostring(quest:GetType()), "MainQuest") or string.match(tostring(quest:GetType()), "SideQuest"))then
-					if(AmbushEnabled ~= 0)then
-						AmbushEnabled = 0
-						updateUserSetting("AmbushEnabled",AmbushEnabled)
-					end
-					else
-					if(AmbushEnabled ~= 1)then
-						AmbushEnabled = 1
-						updateUserSetting("AmbushEnabled",AmbushEnabled)
-					end
-					end
+			if (AutoAmbush == 1) then 
+				-- MainQuest = 0,
+				-- SideQuest = 1,
+				-- MinorQuest = 2,
+				-- StreetStory = 3,
+				-- Contract = 4,
+				-- VehicleQuest = 5
+				local objective = Game.GetJournalManager():GetTrackedEntry()
+				if objective ~= nil then
+					local phase = Game.GetJournalManager():GetParentEntry(objective)
+					local quest = Game.GetJournalManager():GetParentEntry(phase)
+					
+					if(string.match(tostring(quest:GetType()), "MainQuest") or string.match(tostring(quest:GetType()), "SideQuest"))then
+						if(AmbushEnabled ~= 0)then
+							AmbushEnabled = 0
+							updateUserSetting("AmbushEnabled",AmbushEnabled)
+						end
+						else
+						if(AmbushEnabled ~= 1)then
+							AmbushEnabled = 1
+							updateUserSetting("AmbushEnabled",AmbushEnabled)
+						end
+						end
+					
+				end
 				
 			end
 			
-		end
-		
-		--refresh global variable
-		refreshModVariable(refreshModVariabletg)
-		--refresh widget controller
-		refreshUIWidgetController(true)
-		
-		
-		
-		
-		--Targeted entity
-		objLook = Game.GetTargetingSystem():GetLookAtObject(Game.GetPlayer(),false,false)
-		if(objLook ~= nil) then
-			pcall(function()
-				if(objLook ~= nil) then
-					
-					
-					
-					
+			--refresh global variable
+			refreshModVariable(refreshModVariabletg)
+			--refresh widget controller
+			refreshUIWidgetController(true)
+			
+			
+			
+			
+			--Targeted entity
+			objLook = Game.GetTargetingSystem():GetLookAtObject(Game.GetPlayer(),false,false)
+			if(objLook ~= nil) then
+				pcall(function()
 					if(objLook ~= nil) then
-						tarName = objLook:ToString()
-						--	logme(10,tostring(objLook:GetHighLevelStateFromBlackboard()))
-						if(string.match(tarName, "NPCPuppet"))then
-							-- objLook:MarkAsQuest(true)
-							-- logme(10,GameDump(objLook:GetCurrentOutline()))
-							appName = Game.NameToString(objLook:GetCurrentAppearanceName())
-							targName = tostring(objLook:GetTweakDBDisplayName(true))
-							openCompanion, gangscore, lookatgang = checkAttitudeByGangScore(objLook)
-							
-							
-						end
 						
-						local obj = getEntityFromManagerById(objLook:GetEntityID(),true)
 						
-						if(obj.id ~= nil and obj.tag ~= "lookatnpc") then
-							cyberscript.EntityManager["lookatentity"].tag = obj.tag
-							cyberscript.EntityManager["lookatnpc"].id = nil
-							cyberscript.EntityManager["lookatnpc"].tweak = "None"
-							if obj.isquest == nil then obj.isquest = false end
+						
+						
+						if(objLook ~= nil) then
+							tarName = objLook:ToString()
+							--	logme(10,tostring(objLook:GetHighLevelStateFromBlackboard()))
+							if(string.match(tarName, "NPCPuppet"))then
+								-- objLook:MarkAsQuest(true)
+								-- logme(10,GameDump(objLook:GetCurrentOutline()))
+								appName = Game.NameToString(objLook:GetCurrentAppearanceName())
+								targName = tostring(objLook:GetTweakDBDisplayName(true))
+								openCompanion, gangscore, lookatgang = checkAttitudeByGangScore(objLook)
+								
+								
+							end
 							
-							objLook:MarkAsQuest(obj.isquest)
+							local obj = getEntityFromManagerById(objLook:GetEntityID(),true)
+							
+							if(obj.id ~= nil and obj.tag ~= "lookatnpc") then
+								cyberscript.EntityManager["lookatentity"].tag = obj.tag
+								cyberscript.EntityManager["lookatnpc"].id = nil
+								cyberscript.EntityManager["lookatnpc"].tweak = "None"
+								if obj.isquest == nil then obj.isquest = false end
+								
+								objLook:MarkAsQuest(obj.isquest)
+								
+								else
+								
+								
+								cyberscript.EntityManager["lookatentity"].tag = ""
+								
+								if cyberscript.EntityManager["lookatnpc"].isquest == nil then cyberscript.EntityManager["lookatnpc"].isquest = false end
+								
+								objLook:MarkAsQuest(cyberscript.EntityManager["lookatnpc"].isquest)
+								
+								pcall(function ()
+									if(objLook:GetRecordID() ~= nil and objLook:GetRecordID().hash ~= nil and cyberscript.entitieshash[tostring(objLook:GetRecordID().hash)] ~= nil) then
+										
+										
+										cyberscript.EntityManager["lookatnpc"].tweak =  cyberscript.entitieshash[tostring(objLook:GetRecordID().hash)].entity_tweak
+										
+									end
+								end)
+								
+								--	cyberscript.EntityManager["lookatnpc"].id = nil
+								cyberscript.EntityManager["lookatnpc"].id = objLook:GetEntityID()
+								
+							end
+							
+							
+							
+							
+							
+							-- end
+							
+							objLookIsVehicule = objLook:IsVehicle()
+							local obj = getEntityFromManagerById(objLook:GetEntityID())
 							
 							else
 							
-							
-							cyberscript.EntityManager["lookatentity"].tag = ""
-							
-							if cyberscript.EntityManager["lookatnpc"].isquest == nil then cyberscript.EntityManager["lookatnpc"].isquest = false end
-							
-							objLook:MarkAsQuest(cyberscript.EntityManager["lookatnpc"].isquest)
-							
-							pcall(function ()
-								if(objLook:GetRecordID() ~= nil and objLook:GetRecordID().hash ~= nil and cyberscript.entitieshash[tostring(objLook:GetRecordID().hash)] ~= nil) then
-									
-									
-									cyberscript.EntityManager["lookatnpc"].tweak =  cyberscript.entitieshash[tostring(objLook:GetRecordID().hash)].entity_tweak
-									
-								end
-							end)
-							
-							--	cyberscript.EntityManager["lookatnpc"].id = nil
-							cyberscript.EntityManager["lookatnpc"].id = objLook:GetEntityID()
-							
+							openCompanion = false
+							objLookIsVehicule = false
 						end
-						
-						
-						
-						
-						
-						-- end
-						
-						objLookIsVehicule = objLook:IsVehicle()
-						local obj = getEntityFromManagerById(objLook:GetEntityID())
-						
 						else
 						
-						openCompanion = false
-						objLookIsVehicule = false
-					end
-					else
+						if(cyberscript.EntityManager["lookatnpc"].id ~= nil) then
+							cyberscript.EntityManager["lookatnpc"].id = nil
+							cyberscript.EntityManager["lookatnpc"].tweak = "None"
+							currentScannerItem = nil
+							cyberscript.EntityManager["lookatentity"].tag = ""
+							openCompanion = false
+							objLookIsVehicule = false
+						end
 					
-					if(cyberscript.EntityManager["lookatnpc"].id ~= nil) then
-						cyberscript.EntityManager["lookatnpc"].id = nil
-						cyberscript.EntityManager["lookatnpc"].tweak = "None"
-						currentScannerItem = nil
-						cyberscript.EntityManager["lookatentity"].tag = ""
-						openCompanion = false
-						objLookIsVehicule = false
+						
+						
+					end
+				end)
+			end
+			
+			
+			
+			
+			--Vehicle
+			local playerVehicule = Game.GetPlayer():GetQuickSlotsManager():GetVehicleObject()
+			
+			
+				
+
+			if playerVehicule then
+					local filter = {"lookatnpc"}
+					local obj = searchEntityFromManagerById(playerVehicule:GetEntityID(), filter)
+
+					if(cyberscript.EntityManager["current_car"].id == nil or cyberscript.EntityManager["current_car"].id.hash ~= playerVehicule:GetEntityID().hash) then
+						cyberscript.EntityManager["current_car"].id = playerVehicule:GetEntityID()
+						print("save car")
+					end
+					
+					if obj.tag and cyberscript.EntityManager["current_car"].id ~= obj.id then
+						
+						cyberscript.EntityManager["current_car"].tag = obj.tag
+						
+					else
+						cyberscript.EntityManager["current_car"].tag = "current_car"
+						
 					end
 				
-					
-					
-				end
-			end)
-		end
-		
-		
-		
-		
-		--Vehicle
-		local vehicule = Game['GetMountedVehicle;GameObject'](Game.GetPlayer())
-		if(vehicule ~= nil) then
-			local obj = getEntityFromManagerById(vehicule:GetEntityID(),true)
 			
-				if(obj ~= nil) then
-					if cyberscript.EntityManager["current_car"].id ~=  obj.id then
-						cyberscript.EntityManager["current_car"].tag = obj.tag
-						cyberscript.EntityManager["current_car"].id = vehicule:GetEntityID()
-						
-					end	
-				else
-					cyberscript.EntityManager["current_car"].tag = ""
-					cyberscript.EntityManager["current_car"].id = vehicule:GetEntityID()
-					
-				end
-		else
-				if(cyberscript.EntityManager["current_car"] and cyberscript.EntityManager["current_car"].id ~= nil) then
+			else
+				if cyberscript.EntityManager["current_car"].id then
 					cyberscript.EntityManager["current_car"].id = nil
 					cyberscript.EntityManager["current_car"].tag = ""
-					
+					print("desave car")
 				end
-		end
-		
-		
+			end
+
+				
 		end
 		
 		
@@ -5204,6 +5213,42 @@ function getEntityFromManagerById(Id, avoid)
 		if type(enti.id) ~= "number" then
 			
 			if(enti.id ~= nil and Id ~= nil and enti.id.hash == Id.hash) then
+				obj = v
+				key = k
+				break
+			end
+			
+		end
+
+	end
+	
+	if(obj.id ~= nil and obj.tag ~= key) then
+		obj = getEntityFromManager(obj.tag)
+	end
+
+	return obj
+	
+end
+function InTable(tbl, value)
+    for _, v in ipairs(tbl) do
+        if v == value then
+            return true  -- Value found in the table
+        end
+    end
+    return false  -- Value not found in the table
+end
+function searchEntityFromManagerById(Id, avoidfilter)
+	local obj = {}
+	obj.id = nil
+	local key = nil
+
+	for k,v in pairs(cyberscript.EntityManager) do
+		
+		local enti = v
+		
+		if type(enti.id) ~= "number" then
+			
+			if(enti.id ~= nil and Id ~= nil and enti.id.hash == Id.hash and not InTable(avoidfilter,k)) then
 				obj = v
 				key = k
 				break
