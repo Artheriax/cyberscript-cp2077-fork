@@ -20,24 +20,8 @@ function PlaySound(sound,isradio,needrepeat,entity,duration,effect)
 		end
 	
 	end
-
-	if(effect == nil) then
-		Game.GetAudioSystemExt():Play(playsound,CName.new("V"));
-
-	else
-		Game.GetAudioSystemExt():Play(playsound,CName.new("V"));
-		-- -- Create a mutable builder for audio settings
-		-- local builder = AudioSettingsExtBuilder.Create()
-
-		-- -- Set various properties on the builder
-
-		-- builder:SetVolume(effect)
-
-		-- -- Build the settings to get an immutable reference
-		-- local settings = builder:Build()
-		-- Game.GetAudioSystemExt():Play(playsound,CName.new("V"),setting);
-
-	end
+	local id = entity:GetEntityID()
+	Game.GetAudioSystemExt():Play(playsound,id);
 	-- local audioEvent = SoundPlayEvent.new()
 	-- audioEvent.soundName = playsound
 	-- entity:QueueEvent(audioEvent)
@@ -72,53 +56,50 @@ function PlaySoundAtEntity(sound,isradio,needrepeat,tag,duration,effect)
 		end
 	
 	end
+	tag = tag or "player"
+
+	local enti = Game.GetPlayer()
 	local obj = getEntityFromManager(tag)
-	if(obj ~= nil) then
-		local enti = Game.FindEntityByID(obj.id)
-		if(enti ~= nil) then
-			if Game.GetAudioSystemExt():IsRegisteredEmitter(obj.id) == false then
-				Game.GetAudioSystemExt():RegisterEmitter(obj.id)
-			end
-
-
-			if(effect == nil) then
-				Game.GetAudioSystemExt():PlayOnEmitter(playsound,obj.id,CName.new(tag));
+	if(tag ~= "player")then
 		
-			else
-				Game.GetAudioSystemExt():PlayOnEmitter(playsound,obj.id,CName.new(tag));
-				-- local test = AudioSettingsExtBuilder.new()
-				-- -- Create a mutable builder for audio settings
-				-- local builder = test:Create()
-		
-				-- -- Set various properties on the builder
-		
-				-- builder:SetVolume(effect)
-		
-				-- -- Build the settings to get an immutable reference
-				-- local settings = builder:Build()
+		if(obj ~= nil) then
 			
-				-- Game.GetAudioSystemExt():PlayOnEmitter(playsound,obj.id,CName.new(tag),setting);
-			end
-			
-			-- local audioEvent = SoundPlayEvent.new()
-			-- audioEvent.soundName = playsound
-			-- enti:QueueEvent(audioEvent)
-			local times = os.date()
-			
-			cyberscript.soundmanager[sound.tag] = {}
-			cyberscript.soundmanager[sound.tag] = sound
-			cyberscript.soundmanager[sound.tag].isplaying = true
-			cyberscript.soundmanager[sound.tag].emitter = tag
-			cyberscript.soundmanager[sound.tag].emitterid = obj.id
-			cyberscript.soundmanager[sound.tag].isradio = isradio
-			cyberscript.soundmanager[sound.tag].needrepeat = needrepeat
-			cyberscript.soundmanager[sound.tag].startplaying = os.time(os.date("!*t"))+0
-
-			local durationsound = duration or sound.duration
-
-			cyberscript.soundmanager[sound.tag].endplaying = os.time(os.date("!*t"))+durationsound+1
+			enti = Game.FindEntityByID(obj.id)
 		end
 	end
+	if(enti ~= nil) then
+		local id = enti:GetEntityID()
+		CName.add("Cyberscript")
+		if Game.GetAudioSystemExt():IsRegisteredEmitter(id,"Cyberscript") == false  then
+			
+			Game.GetAudioSystemExt():RegisterEmitter(id,"Cyberscript")
+		end
+
+		if(tag ~= "player")then
+				Game.GetAudioSystemExt():PlayOnEmitter(playsound,id,"Cyberscript");
+				
+			else
+				
+				Game.GetAudioSystemExt():Play(playsound,id);
+			end
+		
+		
+		local times = os.date()
+		
+		cyberscript.soundmanager[sound.tag] = {}
+		cyberscript.soundmanager[sound.tag] = sound
+		cyberscript.soundmanager[sound.tag].isplaying = true
+		cyberscript.soundmanager[sound.tag].emitter = tag
+		cyberscript.soundmanager[sound.tag].emitterid = id
+		cyberscript.soundmanager[sound.tag].isradio = isradio
+		cyberscript.soundmanager[sound.tag].needrepeat = needrepeat
+		cyberscript.soundmanager[sound.tag].startplaying = os.time(os.date("!*t"))+0
+
+		local durationsound = duration or sound.duration
+
+		cyberscript.soundmanager[sound.tag].endplaying = os.time(os.date("!*t"))+durationsound+1
+	end
+	
 	
 end
 
