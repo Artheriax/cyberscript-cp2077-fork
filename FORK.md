@@ -27,9 +27,6 @@ interactions renamed (only additive aliases), no events removed.
 - **Fork → upstream**: every fix here is a candidate for an upstream PR.
   The PR #19 fix (B-01) is already open upstream and should be merged
   first. The other fixes can be cherry-picked as separate PRs.
-- **Versioning**: fork releases are tagged as `5.1.4-fork.N` (e.g.
-  `5.1.4-fork.1` for this first bug-fix pass). When upstream cuts 5.1.5,
-  the fork rebases and resets to `5.1.5-fork.0`.
 
 ## How to identify fork patches in source
 

@@ -2,7 +2,7 @@
 
 A maintained fork of [Cyberscript](https://github.com/cyberscript77/release) for Cyberpunk 2077 — a framework that lets mod creators build quests, NPCs, vehicles, factions, and interactive scenes using JSON datapacks instead of REDscript.
 
-[![Version](https://img.shields.io/badge/version-5.1.4--fork.2-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.1.6-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 [![Base](https://img.shields.io/badge/based%20on-cyberscript%20v5.1.4-orange)](https://github.com/cyberscript77/release)
 
@@ -111,13 +111,13 @@ See [CHANGELOG.md](CHANGELOG.md) for the full list of 23 fixes (B-01 through B-2
 
 ### For end users
 
-1. Download `cyberscript-cp2077-fork-5.1.4-fork.2.zip`
-2. Back up your existing `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/` directory (if present)
+1. Download latest version from releases
+2. Back up your existing `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/` directory (if present) or use vortex
 3. Extract the zip into your Cyberpunk 2077 game root, merging with the existing directory
 4. Launch the game
 5. Check `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/cyberscript.log` — you should see:
    ```
-   [Cyberscript Init] initCore() started — version 5.1.4-fork.2
+   [Cyberscript Init] initCore() started — version 5.1.6
    ```
    This confirms you're on the fork version.
 
@@ -348,7 +348,7 @@ Every load now logs the init chain to `cyberscript.log`:
 [Cyberscript Init] setupCore() started
 [Cyberscript Init] setupCore: ModIsLoaded=true, setting up GameSession
 [Cyberscript Init] setupCore: about to call initCore()
-[Cyberscript Init] initCore() started — version 5.1.4-fork.2
+[Cyberscript Init] initCore() started — version 5.1.6
 [Cyberscript Init] SaveLoading() — about to call makeNativeSettings()
 [Cyberscript Init] makeNativeSettings() called — building settings tabs
 [Cyberscript Init] SaveLoading() — makeNativeSettings() completed
@@ -492,7 +492,7 @@ git clone https://github.com/Artheriax/cyberscript-cp2077-fork.git
 cd cyberscript-cp2077-fork
 
 # Apply the bug-fix patch (if starting from a fresh upstream clone)
-git apply cyberscript-cp2077-fork-5.1.4-fork.2.patch
+git apply cyberscript-cp2077-fork-5.1.6.patch
 
 # Verify Lua syntax
 python3 -c "
@@ -509,7 +509,7 @@ for root, dirs, files in os.walk('bin/x64/plugins/cyber_engine_tweaks/mods/cyber
 "
 
 # Package the zip
-zip -r cyberscript-cp2077-fork-5.1.4-fork.2.zip bin/ FORK.md CHANGELOG.md README.md \
+zip -r cyberscript-cp2077-fork-5.1.6.zip bin/ README.md \
   -x "bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/cyberscript.log"
 ```
 

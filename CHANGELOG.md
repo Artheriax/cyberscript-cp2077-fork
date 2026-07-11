@@ -4,7 +4,7 @@ All notable changes to this fork are documented here. Dates are in
 `Europe/Amsterdam` timezone. Bug IDs (`B-XX`) reference
 `research/bugs.md` in this repository.
 
-## [5.1.4-fork.2] — 2026-07-11
+## [5.1.6] — 2026-07-11
 
 Second iteration of the bug-fix pass. Includes all fixes from fork.1
 plus additional fixes discovered during in-game testing with
@@ -88,7 +88,7 @@ mods continue to work without modification.
 
 ---
 
-## [5.1.4-fork.1] — 2026-07-11
+## [5.1.5] — 2026-07-11
 
 First bug-fix pass on top of upstream Cyberscript Core v5.1.4. Addresses
 20 issues sourced from the upstream GitHub repo (`cyberscript77/release`)
