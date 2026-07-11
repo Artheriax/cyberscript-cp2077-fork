@@ -2,7 +2,7 @@
 
 A maintained fork of [Cyberscript](https://github.com/cyberscript77/release) for Cyberpunk 2077 — a framework that lets mod creators build quests, NPCs, vehicles, factions, and interactive scenes using JSON datapacks instead of REDscript.
 
-[![Version](https://img.shields.io/badge/version-5.1.61-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.1.7-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 [![Base](https://img.shields.io/badge/based%20on-cyberscript%20v5.1.4-orange)](https://github.com/cyberscript77/release)
 
@@ -34,13 +34,12 @@ A maintained fork of [Cyberscript](https://github.com/cyberscript77/release) for
       - [Common triggers](#common-triggers)
       - [Player triggers](#player-triggers)
     - [Debugging your mod](#debugging-your-mod)
-      - [1. Debug Entity Lookups (new in fork.2)](#1-debug-entity-lookups-new-in-fork2)
+      - [1. Debug Entity Lookups (new in 5.1.7)](#1-debug-entity-lookups-new-in-517)
       - [2. Enable Logging](#2-enable-logging)
       - [3. Init chain diagnostics](#3-init-chain-diagnostics)
       - [4. API error logging](#4-api-error-logging)
       - [5. Common mod issues](#5-common-mod-issues)
     - [Backward compatibility](#backward-compatibility)
-      - [Behavior changes (5 total)](#behavior-changes-5-total)
     - [Migration from upstream v5.1.3](#migration-from-upstream-v513)
   - [Bug fixes](#bug-fixes)
     - [Critical (2)](#critical-2)
@@ -111,13 +110,13 @@ See [CHANGELOG.md](CHANGELOG.md) for the full list of 23 fixes (B-01 through B-2
 
 ### For end users
 
-1. Download latest version from releases
-2. Back up your existing `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/` directory (if present) or use vortex
 3. Extract the zip into your Cyberpunk 2077 game root, merging with the existing directory
+2. Back up your existing `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/` directory (if present)
+3. Extract the zip into your Cyberpunk 2077 game root, merging with the existing directory or use vortex
 4. Launch the game
 5. Check `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/cyberscript.log` — you should see:
    ```
-   [Cyberscript Init] initCore() started — version 5.1.6
+   [Cyberscript Init] initCore() started — version 5.1.7
    ```
    This confirms you're on the fork version.
 
@@ -207,7 +206,7 @@ api.setVariable(tag, key, score)
 local value = api.getVariableKey(tag, key)
 ```
 
-**All API calls are pcall-wrapped** in this fork — if a call fails, it logs the error to `cyberscript.log` with context (chara, tag, error message) and returns nil, instead of crashing your mod's script. This is new in fork.2.
+All API calls are pcall-wrapped in this fork — if a call fails, it logs the error to `cyberscript.log` with context (chara, tag, error message) and returns nil, instead of crashing your mod's script. This is new in 5.1.7.
 
 ### Action reference
 
@@ -320,7 +319,7 @@ See `mod/data/triggertemplate.json` for the full list.
 
 This fork includes several debugging tools:
 
-#### 1. Debug Entity Lookups (new in fork.2)
+#### 1. Debug Entity Lookups (new in 5.1.7)
 
 **Options → Mods → CyberScript → Script Settings → "Debug Entity Lookups"**
 
@@ -348,7 +347,7 @@ Every load now logs the init chain to `cyberscript.log`:
 [Cyberscript Init] setupCore() started
 [Cyberscript Init] setupCore: ModIsLoaded=true, setting up GameSession
 [Cyberscript Init] setupCore: about to call initCore()
-[Cyberscript Init] initCore() started — version 5.1.6
+[Cyberscript Init] initCore() started — version 5.1.7
 [Cyberscript Init] SaveLoading() — about to call makeNativeSettings()
 [Cyberscript Init] makeNativeSettings() called — building settings tabs
 [Cyberscript Init] SaveLoading() — makeNativeSettings() completed
@@ -373,9 +372,9 @@ Every `api.*` call is wrapped in pcall. If a call fails, you'll see:
 | NPC doesn't spawn | Invalid character tweak ID | Check `Character.XXX` exists in TweakDB |
 | Settings tab missing | `nativeSettings` mod not installed | Install nativeSettings |
 | "no such table: Characters" | Missing/corrupt `db.sqlite3` | Reinstall Cyberscript (db.sqlite3 ships with it) |
-| "Record already exists" spam | Trying to create a TweakDB record that exists | Use `clone_tweak` or check existence first (fork.2 auto-skips) |
-| Menu navigation stuck | Hub callback threw an exception | fork.2 wraps in pcall — but check your callback for errors |
-| F-key doesn't work | Old `inputUserMappings.xml` installed | fork.2 moved it to `mod/data/legacy/` — don't install it |
+| "Record already exists" spam | Trying to create a TweakDB record that exists | Use `clone_tweak` or check existence first (5.1.7 auto-skips) |
+| Menu navigation stuck | Hub callback threw an exception | 5.1.7 wraps in pcall — but check your callback for errors |
+| F-key doesn't work | Old `inputUserMappings.xml` installed | 5.1.7 moved it to `mod/data/legacy/` — don't install it |
 
 ### Backward compatibility
 
@@ -384,11 +383,9 @@ This fork is **100% backward compatible** with mods built for upstream Cyberscri
 - **No public API signatures changed** — all `api.*` functions have the same arguments and return values
 - **No action names removed** — only aliases added (`player_rotate`, `player_look_at_xyz`)
 - **No trigger names changed**
-- **No interaction names changed** — fork.2 adds an alias system (`mod/data/legacy_interaction_aliases.json`) for restoring pre-v5.1.4 names if needed
+- **No interaction names changed** — 5.1.7 adds an alias system (`mod/data/legacy_interaction_aliases.json`) for restoring pre-v5.1.4 names if needed
 - **No settings removed** — `inputUserMappings.xml` and `settings.lua` were *moved* to `mod/data/legacy/`, not deleted
 - **No save format changes** — `currentSave` structure is identical
-
-#### Behavior changes (5 total)
 
 These are the only behavior differences from upstream v5.1.4:
 
@@ -439,6 +436,7 @@ This fork addresses 23 issues. See [CHANGELOG.md](CHANGELOG.md) for full details
 - **B-21**: "Record already exists" log spam — existence check before clone/create
 - **B-22**: `IsA` crash — phone controller check wrapped in pcall
 - **B-23**: Entity/group lookup crashes — comprehensive nil-guard pass (254 call sites)
+- **B-24**: Observer `IsA`/`GetMappin` crashes — wrapped in pcall
 
 ### Medium (7)
 - **B-08**: Time stops after `unfreeze_player` — fixed to use `UnsetTimeDilation`
@@ -447,7 +445,7 @@ This fork addresses 23 issues. See [CHANGELOG.md](CHANGELOG.md) for full details
 - **B-13**: API error logging — all `api.*` calls wrapped in pcall
 - **B-15**: Gang-info world-map override — re-added as opt-in setting
 - **B-17**: Cyberware-EX conflict — verified resolved in 5.1.4
-- **db.sqlite3**: Now ships with the mod (was excluded in fork.1 by mistake)
+- **db.sqlite3**: Now ships with the mod (was excluded in 5.1.5 by mistake)
 
 ### Low (4)
 - **B-16**: REDmod → Audioware migration — documented (already shipped upstream)
@@ -492,7 +490,7 @@ git clone https://github.com/Artheriax/cyberscript-cp2077-fork.git
 cd cyberscript-cp2077-fork
 
 # Apply the bug-fix patch (if starting from a fresh upstream clone)
-git apply cyberscript-cp2077-fork-5.1.6.patch
+git apply cyberscript-cp2077-fork-5.1.7.patch
 
 # Verify Lua syntax
 python3 -c "
@@ -509,7 +507,7 @@ for root, dirs, files in os.walk('bin/x64/plugins/cyber_engine_tweaks/mods/cyber
 "
 
 # Package the zip
-zip -r cyberscript-cp2077-fork-5.1.6.zip bin/ README.md \
+zip -r cyberscript-cp2077-fork-5.1.7.zip bin/ README.md FORK.md CHANGELOG.md \
   -x "bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/cyberscript.log"
 ```
 

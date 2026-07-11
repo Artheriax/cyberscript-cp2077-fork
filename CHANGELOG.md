@@ -4,13 +4,15 @@ All notable changes to this fork are documented here. Dates are in
 `Europe/Amsterdam` timezone. Bug IDs (`B-XX`) reference
 `research/bugs.md` in this repository.
 
-## [5.1.6] — 2026-07-11
+## [5.1.7] — 2026-07-11
 
-Second iteration of the bug-fix pass. Includes all fixes from fork.1
-plus additional fixes discovered during in-game testing with
-Companions of Night City, Gangs of Night City, and Cyberscript Studio.
+Bug-fix pass on top of upstream Cyberscript Core v5.1.4. Addresses 24 issues
+sourced from the upstream GitHub repo (`cyberscript77/release`) and the
+NexusMods bugs/posts tabs (mod ID 6475), plus additional fixes discovered
+during in-game testing with Companions of Night City, Gangs of Night City,
+and Cyberscript Studio.
 
-### New fixes in fork.2
+### Critical fixes
 
 - **B-21** (`modpack.lua`, `core.lua`, `see.lua`): Suppress "Record already
   exists" log spam from `TweakDB:CloneRecord` / `TweakDB:CreateRecord`.
@@ -45,9 +47,9 @@ Companions of Night City, Gangs of Night City, and Cyberscript Studio.
     character/position or missing group logs a warning and skips the
     single spawn, instead of aborting the entire action list.
 
-### Carried over from fork.1
+### Carried over from initial pass
 
-All 18 fixes from fork.1 are included:
+All 18 fixes from the initial bug-fix pass are included:
 - B-01 (GameTime error), B-02 (stuck menus), B-03/B-18 (refresh throttle),
   B-04/B-11 (vehicle spawn guards), B-05 (NoCombat cleanup), B-06/B-20
   (legacy F-key files moved), B-07 (garage validation), B-08 (unfreeze_player),
@@ -57,12 +59,12 @@ All 18 fixes from fork.1 are included:
 
 ### Critical fix discovered during testing
 
-- **db.sqlite3 must ship with the mod** — fork.1 mistakenly excluded
-  `db.sqlite3` from the zip, causing `no such table: Characters` to crash
-  `setupCore()` before `initCore()` could run. This made the entire settings
-  UI disappear and cascaded into per-frame `EntityManager is nil` errors.
-  fork.2 includes `db.sqlite3` (1.05 MB, 3,977 character records) and adds
-  an `ensureDBReady()` guard in `db.lua` so a missing/corrupt database
+- **db.sqlite3 must ship with the mod** — the initial zip mistakenly excluded
+  `db.sqlite3` from the distribution, causing `no such table: Characters` to
+  crash `setupCore()` before `initCore()` could run. This made the entire
+  settings UI disappear and cascaded into per-frame `EntityManager is nil`
+  errors. 5.1.7 includes `db.sqlite3` (1.05 MB, 3,977 character records) and
+  adds an `ensureDBReady()` guard in `db.lua` so a missing/corrupt database
   degrades gracefully instead of crashing the init chain.
 
 - **Init-chain race conditions** — added nil guards to `refreshModVariable`
@@ -88,7 +90,7 @@ mods continue to work without modification.
 
 ---
 
-## [5.1.5] — 2026-07-11
+## [5.1.5] — 2026-07-11 (initial bug-fix pass, superseded by 5.1.7)
 
 First bug-fix pass on top of upstream Cyberscript Core v5.1.4. Addresses
 20 issues sourced from the upstream GitHub repo (`cyberscript77/release`)

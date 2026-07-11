@@ -1,5 +1,5 @@
-{                                        
-    "version": "5.1.6", 
-  "channel": "stable",                                        
-  "changelog": ""                                        
+{
+    "version": "5.1.7",
+  "channel": "stable",
+  "changelog": "Bug-fix pass: B-01 through B-24. See CHANGELOG.md for details."
 }                                        
