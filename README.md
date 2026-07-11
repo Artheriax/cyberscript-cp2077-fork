@@ -2,7 +2,7 @@
 
 A maintained fork of [Cyberscript](https://github.com/cyberscript77/release) for Cyberpunk 2077 — a framework that lets mod creators build quests, NPCs, vehicles, factions, and interactive scenes using JSON datapacks instead of REDscript.
 
-[![Version](https://img.shields.io/badge/version-5.1.6-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.1.61-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 [![Base](https://img.shields.io/badge/based%20on-cyberscript%20v5.1.4-orange)](https://github.com/cyberscript77/release)
 
