@@ -898,6 +898,11 @@ function openanpage(page)
         irpmenu[page] = true
 end
 function buildnativesetting()
+        -- Guard: if nativeSettings mod isn't loaded yet (or initCore hasn't run),
+        -- skip gracefully instead of crashing the refresh loop every frame.
+        if nativeSettings == nil then
+                return
+        end
         if(nativeSettings.pathExists("CSKEYBIND/InfoController")) then
                 --update current controller label
                 nativeSettings["CSKEYBIND"].subcategories["InfoController"].label = "Current controller configuration : "..currentControllerName

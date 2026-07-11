@@ -383,6 +383,7 @@ end
 -- ---------------------------------------------------------------------------
 
 function setupCore() --Setup environnement (DatapackLoading, observer, overrider)
+        logme(1, "[Cyberscript Init] setupCore() started", true)
         
         inputManager.onInit()
         GameUI.Listen(function(state)
@@ -397,7 +398,20 @@ function setupCore() --Setup environnement (DatapackLoading, observer, overrider
                         firstexecutionshard = nil
                         end
                 else
-                        if(GameController["NewHudPhoneGameController"] ~= nil and GameController["NewHudPhoneGameController"]:IsA('NewHudPhoneGameController') and GameController["NewHudPhoneGameController"]:IsPhoneActive() == true) then
+                        -- B-22 fix: the GameUI callback fires on every menu state change.
+                        -- The original code called :IsA('NewHudPhoneGameController') without
+                        -- checking the controller is still a valid scriptable, which throws
+                        -- "Function 'IsA' context must be 'IScriptable'" when the controller
+                        -- is mid-teardown. Wrap the whole check in pcall so a stale
+                        -- controller reference can never crash the GameUI listener.
+                        local phoneActive = false
+                        pcall(function()
+                                local ctrl = GameController["NewHudPhoneGameController"]
+                                if ctrl ~= nil and ctrl:IsA('NewHudPhoneGameController') and ctrl:IsPhoneActive() == true then
+                                        phoneActive = true
+                                end
+                        end)
+                        if phoneActive then
                                 inMenu = true
                                 ActiveMenu = "Phone"
                                 ActiveSubMenu = "Phone"
@@ -440,10 +454,12 @@ function setupCore() --Setup environnement (DatapackLoading, observer, overrider
                 
         
         if(ModIsLoaded) then
+                logme(1, "[Cyberscript Init] setupCore: ModIsLoaded=true, setting up GameSession", true)
                 reloadDB()
                 GameSession.StoreInDir('user/sessions')
                 GameSession.Persist(currentSave, true)
                 GameSession.OnLoad(function() 
+                        logme(1, "[Cyberscript Init] GameSession.OnLoad fired", true)
                         reloadDB()
                         inputManager.onShutdown()
                         for k,v in pairs(mappinManager) do
@@ -470,21 +486,30 @@ function setupCore() --Setup environnement (DatapackLoading, observer, overrider
                         cyberscriptSyncInvisibilityOnLoad()
                 end)
                 -- B-05 fix: also clear NoCombat + reset hubShown on Death events.
-                -- Second Heart fires a revive shortly after death, but the NoCombat
-                -- status is applied at death-time and may not be cleared if the
-                -- player had a Cyberscript hub open when they died.
-                GameSession.Observe('Death', function()
-                        pcall(function()
-                                if interactionUI then
-                                        interactionUI.hubShown = false
-                                        interactionUI.input = false
-                                end
+                -- Wrapped in pcall so it can NEVER abort the init chain. If this
+                -- fails (e.g. GameSession.Observe doesn't support 'Death' in this
+                -- CET version), we log and continue — initCore() must still run.
+                local deathObserveOk, deathObserveErr = pcall(function()
+                        GameSession.Observe('Death', function()
+                                pcall(function()
+                                        if interactionUI then
+                                                interactionUI.hubShown = false
+                                                interactionUI.input = false
+                                        end
+                                end)
+                                cyberscriptClearNoCombatAndResetUI()
                         end)
-                        cyberscriptClearNoCombatAndResetUI()
                 end)
+                if not deathObserveOk then
+                        logme(1, "[Cyberscript Init] WARNING: GameSession.Observe('Death') failed (non-fatal): " .. tostring(deathObserveErr), true)
+                end
+                logme(1, "[Cyberscript Init] setupCore: about to call initCore()", true)
                 initCore()
+                logme(1, "[Cyberscript Init] setupCore: initCore() completed", true)
                 
                 CName.add("Available Quests")
+        else
+                logme(1, "[Cyberscript Init] setupCore: ModIsLoaded is FALSE — initCore will not run", true)
         end
 end
 
@@ -671,8 +696,19 @@ function shutdownManager() -- setup some function at shutdown
 end
 function TweakManager() -- Load vehicles and change some TweakDB
         
-                TweakDB:CloneRecord("Cyberscript.Player_Male", "Character.TPP_Player_Cutscene_Male")
-                TweakDB:CloneRecord("Cyberscript.Player_Female", "Character.TPP_Player_Cutscene_Female")
+                -- B-21 fix: only clone Player_Male/Player_Female if they don't already exist.
+                -- TweakManager runs on every onTweak event; without this guard, CET logs
+                -- "Record already exists" on every reload.
+                pcall(function()
+                        if TweakDB:GetRecord("Cyberscript.Player_Male") == nil then
+                                TweakDB:CloneRecord("Cyberscript.Player_Male", "Character.TPP_Player_Cutscene_Male")
+                        end
+                end)
+                pcall(function()
+                        if TweakDB:GetRecord("Cyberscript.Player_Female") == nil then
+                                TweakDB:CloneRecord("Cyberscript.Player_Female", "Character.TPP_Player_Cutscene_Female")
+                        end
+                end)
                 
                 
                 TweakDB:SetFlat("Cyberscript.Player_Male.entityTemplatePath", "base\\cyberscript\\ent\\player_ma_tpp.ent")

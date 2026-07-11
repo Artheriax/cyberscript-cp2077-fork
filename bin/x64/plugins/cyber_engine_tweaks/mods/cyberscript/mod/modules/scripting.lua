@@ -204,10 +204,10 @@ function mainThread(active)-- update event when mod is ready and in game (main t
                         
                         --Vehicle
                         -- Guard: cyberscript.EntityManager may be nil if mainThread fires
-                        -- before initCore completes (race condition). Skip the vehicle
-                        -- tracking block until EntityManager is ready.
+                        -- before initCore completes (race condition). Skip the ENTIRE
+                        -- vehicle tracking block until EntityManager is ready.
                         local playerVehicule = nil
-                        if cyberscript and cyberscript.EntityManager then
+                        if cyberscript and cyberscript.EntityManager and cyberscript.EntityManager["current_car"] then
                                 playerVehicule = Game.GetPlayer():GetQuickSlotsManager():GetVehicleObject()
                         end
                         
@@ -233,7 +233,7 @@ function mainThread(active)-- update event when mod is ready and in game (main t
                                         end
                                 
                         
-                        else
+                        elseif cyberscript and cyberscript.EntityManager and cyberscript.EntityManager["current_car"] then
                                 if cyberscript.EntityManager["current_car"].id then
                                         cyberscript.EntityManager["current_car"].id = nil
                                         cyberscript.EntityManager["current_car"].tag = ""

@@ -1380,13 +1380,21 @@ function FillTweakFlatArchive()
                         end
                         
                         if(object.type == "clone") then
-                        
-                                TweakDB:CloneRecord(source, object.value)
+                                -- B-21 fix: skip clone if record already exists (avoids log spam)
+                                pcall(function()
+                                        if TweakDB:GetRecord(source) == nil then
+                                                TweakDB:CloneRecord(source, object.value)
+                                        end
+                                end)
                         end
 
                         if(object.type == "create") then
-                        
-                                TweakDB:CreateRecord(source, object.value)
+                                -- B-21 fix: skip create if record already exists (avoids log spam)
+                                pcall(function()
+                                        if TweakDB:GetRecord(source) == nil then
+                                                TweakDB:CreateRecord(source, object.value)
+                                        end
+                                end)
                         end
 
                         if(object.type == "delete") then
@@ -1407,7 +1415,17 @@ function FillCharacterArchive()
 
         for k, ent in pairs(cyberscript.cache["character"]) do
         
-        TweakDB:CloneRecord(ent.data.name, ent.data.source)
+        -- B-21 fix: TweakDB:CloneRecord logs "Record already exists" every time
+        -- FillCharacterArchive runs (on every LoadDataPackCache / hot-reload).
+        -- Check existence first to suppress the noise. The record is created
+        -- successfully on the first run; subsequent runs just re-apply the
+        -- flats below, which is the intended behavior.
+        local recordName = ent.data.name
+        pcall(function()
+                if TweakDB:GetRecord(recordName) == nil then
+                        TweakDB:CloneRecord(recordName, ent.data.source)
+                end
+        end)
         
         
         if(ent.data.model ~= nil) then

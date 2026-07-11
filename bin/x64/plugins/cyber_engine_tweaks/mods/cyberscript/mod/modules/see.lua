@@ -5433,11 +5433,21 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
 
                                 if(action.name == "clone_tweak") then
-                                        TweakDB:CloneRecord(action.source, action.value)
+                                        -- B-21 fix: skip if record already exists (avoids log spam)
+                                        pcall(function()
+                                                if TweakDB:GetRecord(action.source) == nil then
+                                                        TweakDB:CloneRecord(action.source, action.value)
+                                                end
+                                        end)
                                 end
 
                                 if(action.name == "create_tweak") then
-                                        TweakDB:CreateRecord(action.source, action.value)
+                                        -- B-21 fix: skip if record already exists (avoids log spam)
+                                        pcall(function()
+                                                if TweakDB:GetRecord(action.source) == nil then
+                                                        TweakDB:CreateRecord(action.source, action.value)
+                                                end
+                                        end)
                                 end
 
                                 if(action.name == "delete_tweak") then
