@@ -101,8 +101,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the full list of 23 fixes (B-01 through B-2
 
 - **Cyberpunk 2077** patch 2.12 or later (patch 2.3+ supported)
 - **Cyber Engine Tweaks (CET)** v1.32.1+ — [NexusMods](https://www.nexusmods.com/cyberpunk2077/mods/107)
-- **nativeSettings** — [NexusMods](https://www.nexusmods.com/cyberpunk2077/mods/1591)
-- **Codeware** — [NexusMods](https://www.nexusmods.com/cyberpunk2077/mods/10829) (required for entity spawning)
+- **nativeSettings** — [NexusMods](https://www.nexusmods.com/cyberpunk2077/mods/3518)
+- **Codeware** — [NexusMods](https://www.nexusmods.com/cyberpunk2077/mods/7780) (required for entity spawning)
 - **Appearance Menu Mod (AMM)** — optional, but recommended for character appearances
 
 ---
