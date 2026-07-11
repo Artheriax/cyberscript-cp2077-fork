@@ -1,4 +1,46 @@
 logme(1,"CyberScript: see module loaded")
+
+-- B-23 fix: safe wrapper for Game.FindEntityByID.
+-- Accepts either a manager entry (table with .id) or a raw entityID.
+-- Handles nil, missing .id, and invalid id types without crashing.
+-- Returns nil on any failure; callers should check `if enti ~= nil`.
+--
+-- DEBUGGING: if the user enables "debugEntityLookups" in
+-- user/settings/cyberscript.json (or via the native settings UI),
+-- every nil/skipped lookup is logged with the tag and reason so mod
+-- authors can see which entity references are invalid.
+-- Default: OFF (silent). Turn on only when debugging missing entities.
+function safeFindEntityByID(idOrObj, contextTag)
+    local id = idOrObj
+    if idOrObj == nil then
+        if debugEntityLookups == true then
+            logme(3, "[safeFindEntityByID] nil input" .. (contextTag and (" tag=" .. tostring(contextTag)) or ""))
+        end
+        return nil
+    end
+    -- If passed a manager entry (table with .id), extract the id
+    if type(idOrObj) == "table" and idOrObj.id ~= nil then
+        id = idOrObj.id
+    end
+    if id == nil then
+        if debugEntityLookups == true then
+            logme(3, "[safeFindEntityByID] nil id" .. (contextTag and (" tag=" .. tostring(contextTag)) or ""))
+        end
+        return nil
+    end
+    local ok, res = pcall(function() return Game.FindEntityByID(id) end)
+    if ok then
+        if res == nil and debugEntityLookups == true then
+            logme(3, "[safeFindEntityByID] entity not found" .. (contextTag and (" tag=" .. tostring(contextTag)) or "") .. " id=" .. tostring(id))
+        end
+        return res
+    end
+    if debugEntityLookups == true then
+        logme(2, "[safeFindEntityByID] pcall failed" .. (contextTag and (" tag=" .. tostring(contextTag)) or "") .. " err=" .. tostring(res))
+    end
+    return nil
+end
+
 cyberscript.module = cyberscript.module +1
 vitesseParLettre = 1 / 12
 
@@ -92,7 +134,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "entity_is_spawn") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 if(obj.id ~= nil) then
-                                        local enti = Game.FindEntityByID(obj.id)        
+                                        local enti = safeFindEntityByID(obj)        
                                         if(enti ~= nil) then
                                                 ----logme(3,"entity is active"..tostring(enti:IsAttached()))
                                                 if (enti:IsAttached() == true)then
@@ -105,7 +147,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "entity_is_vehicle") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 if(obj.id ~= nil) then
-                                        local enti = Game.FindEntityByID(obj.id)        
+                                        local enti = safeFindEntityByID(obj)        
                                         if(enti ~= nil) then
                                                 ----logme(3,"entity is active"..tostring(enti:IsAttached()))
                                                 
@@ -135,7 +177,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "entity_is_scanned") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 if(obj.id ~= nil) then
-                                        local enti = Game.FindEntityByID(obj.id)        
+                                        local enti = safeFindEntityByID(obj)        
                                         if(enti ~= nil) then
                                                 ----logme(3,"entity is active"..tostring(enti:IsAttached()))
                                                 if (enti:IsScanned() == true)then
@@ -148,7 +190,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "entity_is_crowd") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 if(obj.id ~= nil) then
-                                        local enti = Game.FindEntityByID(obj.id)        
+                                        local enti = safeFindEntityByID(obj)        
                                         if(enti ~= nil) then
                                                 ----logme(3,"entity is active"..tostring(enti:IsAttached()))
                                                 result = enti:IsCrowd()
@@ -175,7 +217,7 @@ function scriptcheckTrigger(trigger)
                                 if scannedEntity ~= nil then
                                         local obj = getEntityFromManager(trigger.value)
                                         if(obj.id ~= nil) then
-                                                local enti = Game.FindEntityByID(obj.id)        
+                                                local enti = safeFindEntityByID(obj)        
                                                 if(enti ~= nil) then
                                                         
                                                         if(enti:GetEntityID().hash == scannedEntity:GetEntityID().hash and (trigger.npc_only == false or (trigger.npc_only == true and enti:IsA("NPCPuppet"))))then 
@@ -190,7 +232,7 @@ function scriptcheckTrigger(trigger)
                         
                                         local obj = getEntityFromManager(trigger.tag)
                                         if(obj.id ~= nil) then
-                                                local enti = Game.FindEntityByID(obj.id)        
+                                                local enti = safeFindEntityByID(obj)        
                                                 if(enti ~= nil) then
                                                         
                                                         if(enti:IsA(trigger.value))then 
@@ -204,8 +246,8 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "look_at_entity") then
                                 if objLook ~= nil then
                                         local obj = getEntityFromManager(trigger.value)
-                                        if(obj.id ~= nil) then
-                                                local enti = Game.FindEntityByID(obj.id)        
+                                        if(obj and obj.id ~= nil) then
+                                                local enti = safeFindEntityByID(obj)        
                                                 if(enti ~= nil) then
                                                         
                                                         if(enti:GetEntityID().hash == objLook:GetEntityID().hash)then 
@@ -229,8 +271,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "killed_entity") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                if(enti ~= nil) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
                                         
                                         result = (enti:IsDead() == true or enti:IsActive() == false)
                                         
@@ -238,8 +284,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_is_alive") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                if(enti ~= nil) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
                                         
                                         result = enti:IsDead() == false and enti:IsActive() == true
                                 end
@@ -279,7 +329,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "entity_at_position") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 --logme(3,obj.tag)
-                                local enti = Game.FindEntityByID(obj.id)
+                                local enti = safeFindEntityByID(obj)
                                 if(enti ~= nil) then
                                         if(trigger.position == nil) then trigger.position = "at" end
                                         
@@ -297,8 +347,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_in_state") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                if(enti ~= nil) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
                                         local testres, err = pcall(function()
                                                 local levelstate = enti:GetHighLevelStateFromBlackboard()
                                                 local triggerlevelstate  = gamedataNPCHighLevelState.Any
@@ -346,13 +400,17 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_inbuilding")then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                result = Game.IsEntityInInteriorArea(enti)
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+result = Game.IsEntityInInteriorArea(enti)
                         end
                         if(trigger.name == "entity_gender") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 if(obj.id ~= nil) then
-                                        local enti = Game.FindEntityByID(obj.id)        
+                                        local enti = safeFindEntityByID(obj)        
                                         if(enti ~= nil) then
                                                 logme(1,GetEntityGender(enti))
                                                 logme(1,trigger.value)
@@ -368,7 +426,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "entity_hash") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 if(obj.id ~= nil) then
-                                        local enti = Game.FindEntityByID(obj.id)        
+                                        local enti = safeFindEntityByID(obj)        
                                         if(enti ~= nil) then
                                                 
                                                 if(trigger.value == tostring(enti:GetEntityID().hash)) then
@@ -403,7 +461,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "if_entity_contains_value") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 if(obj.id ~= nil) then
-                                        local enti = Game.FindEntityByID(obj.id)        
+                                        local enti = safeFindEntityByID(obj)        
                                         if(enti ~= nil) then
                                                 local entName = enti:ToString()
                                                 local entAppName = Game.NameToString(enti:GetCurrentAppearanceName())
@@ -425,7 +483,7 @@ function scriptcheckTrigger(trigger)
                                 
                                 local obj = getEntityFromManager(trigger.tag)
                                 local goodEntity = false
-                                local enti = Game.FindEntityByID(obj.id)
+                                local enti = safeFindEntityByID(obj)
                                 if(enti ~= nil) then
                                         
                                         player = Game.GetPlayer()
@@ -565,12 +623,12 @@ function scriptcheckTrigger(trigger)
                                 local enemy_count = 0
                                 local group =getGroupfromManager(trigger.tag)
                                 --logme(3,group.tag)
-                                --logme(3,#group.entities)
+                                --logme(3,#(group and (group and group.entities or {}) or {}))
                                 if(group ~= nil) then
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)        
+                                                local enti = safeFindEntityByID(obj)        
                                                 --logme(3,obj.tag)
                                                 --logme(3,obj.id)
                                                 --logme(3,enti)
@@ -582,7 +640,7 @@ function scriptcheckTrigger(trigger)
                                                         end
                                                 end
                                         end
-                                        if (enemy_count == #group.entities) then
+                                        if (enemy_count == #(group and (group and group.entities or {}) or {})) then
                                                 result = true
                                         end
                                 end
@@ -591,10 +649,10 @@ function scriptcheckTrigger(trigger)
                                 local enemy_count = 0
                                 local group =getGroupfromManager(trigger.tag)
                                 if(group ~= nil ) then
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)        
+                                                local enti = safeFindEntityByID(obj)        
                                                 if(enti ~= nil) then
                                                         --logme(3,"entity is active"..tostring(enti:IsActive()))
                                                         if (enti:IsDead() == true or enti:IsActive() == false)then
@@ -605,7 +663,7 @@ function scriptcheckTrigger(trigger)
                                                         enemy_count = enemy_count + 1
                                                 end
                                         end
-                                        if (enemy_count == #group.entities) then
+                                        if (enemy_count == #(group and (group and group.entities or {}) or {})) then
                                                 result = true
                                                 --logme(3,tostring(result))
                                         end
@@ -615,8 +673,8 @@ function scriptcheckTrigger(trigger)
                                 local group =getGroupfromManager(trigger.tag)
                                 local count = 0
                                 if(group ~= nil ) then
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
                                                 if(obj.id ~= nil) then
                                                         if(checkValue(trigger.operator,obj.scriptlevel,trigger.scriptlevel,trigger.min,trigger.max)) then
@@ -626,7 +684,7 @@ function scriptcheckTrigger(trigger)
                                                         end
                                                 end
                                         end
-                                        result = (count == #group.entities)
+                                        result = (count == #(group and (group and group.entities or {}) or {}))
                                 end
                                 
                                 
@@ -782,8 +840,12 @@ function scriptcheckTrigger(trigger)
                                 if (vehicule ~= nil) then
                                         
                                         local obj = getEntityFromManager(trigger.tag)
-                                        local enti = Game.FindEntityByID(obj.id)        
-                                        if(enti ~= nil) then
+                                        local enti = nil
+                                        if obj and obj.id then
+                                            local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                            if _ok then enti = _res end
+                                        end
+if(enti ~= nil) then
                                                 result = (obj.id == vehicule:GetEntityID())
                                         end
                                 end
@@ -791,9 +853,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_in_car") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                
-                                if(enti ~= nil) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
                                         local inVehicule = Game.GetWorkspotSystem():IsActorInWorkspot(enti)
                                         if (inVehicule) then
                                                 local vehicule = Game['GetMountedVehicle;GameObject'](enti)
@@ -803,9 +868,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "vehicle_entity_is_moving") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                
-                                if(enti ~= nil and enti:IsVehicle()) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil and enti:IsVehicle()) then
                                         result = not (enti:GetCurrentSpeed() == 0 or enti:GetCurrentSpeed() == -0 )
                                         
                                 end
@@ -825,9 +893,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_in_car_specific") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                
-                                if(enti ~= nil) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
                                         local inVehicule = Game.GetWorkspotSystem():IsActorInWorkspot(enti)
                                         if (inVehicule) then
                                                 local vehicule = Game['GetMountedVehicle;GameObject'](enti)
@@ -1018,8 +1089,12 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "check_scannerdata_for_entity") then
                                 
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)
-                                if(enti ~= nil and ScannerInfoManager[trigger.tag]) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil and ScannerInfoManager[trigger.tag]) then
                                         
                                         
                                         
@@ -1215,8 +1290,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_is_in_custom_place_type") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                if(enti ~= nil and currentHouse ~= nil )then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil and currentHouse ~= nil )then
                                         if(trigger.value == currentHouse.type) then
                                                 local targetPosition = enti:GetWorldPosition()
                                                 if check3DPos(targetPosition, currentHouse.x, currentHouse.x, currentHouse.z,currentHouse.range,currentHouse.range_z) then
@@ -1229,8 +1308,12 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_is_in_custom_room_type") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                if(enti ~= nil and currentRoom ~= nil )then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil and currentRoom ~= nil )then
                                         local targetPosition = enti:GetWorldPosition()
                                         if( check3DPos(targetPosition, currentRoom.x, currentRoom.x, currentRoom.z,currentRoom.range,currentRoom.range_z)) then
                                                 for i=1,#currentRoom.type do
@@ -1266,8 +1349,8 @@ function scriptcheckTrigger(trigger)
                                 end
                         end
                         if(trigger.name == "have_selected_item_can_be_grabbed") then
-                                if selectedItem ~= nil  and selectedItem.entityId ~= nil and Game.FindEntityByID(selectedItem.entityId)~=nil then
-                                        result = Game.FindEntityByID(selectedItem.entityId):IsA('gameObject') 
+                                if selectedItem ~= nil  and selectedItem.entityId ~= nil and safeFindEntityByID(selectedItem.entityId)~=nil then
+                                        result = safeFindEntityByID(selectedItem.entityId):IsA('gameObject') 
                                 end
                         end
                 end
@@ -1304,9 +1387,19 @@ function scriptcheckTrigger(trigger)
                         end
                         if(trigger.name == "entity_in_faction") then
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)        
-                                if(enti ~= nil) then
-                                        local targetAttAgent = enti:GetAttitudeAgent()
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
+                                        local targetAttAgent = nil
+                                        pcall(function() targetAttAgent = enti:GetAttitudeAgent() end)
+                                        if targetAttAgent == nil then
+                                                -- Entity doesn't have an AttitudeAgent (not an NPC / special entity type).
+                                                -- Skip the faction check for this entity.
+                                                return
+                                        end
                                         local group = Game.NameToString(targetAttAgent:GetAttitudeGroup())
                                         local npcCurrentName = Game.NameToString(enti:GetCurrentAppearanceName())
                                         local faction = getFactionByTag(trigger.faction)
@@ -1812,8 +1905,12 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name== "device_active_radio_channel_id") then
                                 
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)
-                                if(enti ~= nil) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
                                         local ps = enti:GetDevicePS()
                                         result = ps.activeStation == trigger.value
                                         
@@ -1824,8 +1921,12 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name== "device_active_tv_channel_id") then
                                 
                                 local obj = getEntityFromManager(trigger.tag)
-                                local enti = Game.FindEntityByID(obj.id)
-                                if(enti ~= nil) then
+                                local enti = nil
+                                if obj and obj.id then
+                                    local _ok, _res = pcall(function() return safeFindEntityByID(obj) end)
+                                    if _ok then enti = _res end
+                                end
+if(enti ~= nil) then
                                         local ps = enti:GetController():GetPS():GetActiveStationIndex()
                                         result = ps.activeStation == trigger.value
                                         
@@ -2050,7 +2151,7 @@ function scriptcheckTrigger(trigger)
                         if(trigger.name == "is_arrived_to_destination") then
                                 local obj = getEntityFromManager(trigger.tag)
                                 --logme(3,obj.tag)
-                                local enti = Game.FindEntityByID(obj.id)
+                                local enti = safeFindEntityByID(obj)
                                 if(enti ~= nil) then
                                         local targetPosition = enti:GetWorldPosition()
                                         if obj.destination ~= nil then
@@ -2341,8 +2442,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "despawn_group") then
                                         local group =getGroupfromManager(action.tag)
                                         if group ~= nil then
-                                                for i=1, #group.entities do 
-                                                        local entityTag = group.entities[i]
+                                                for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                        local entityTag = (group and group.entities or {})[i]
                                                         
                                                         despawnEntity(entityTag)
                                                         
@@ -2380,8 +2481,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         
                                                 local group =getGroupfromManager(action.tag)
                                                 if group ~= nil then
-                                                        for i=1, #group.entities do 
-                                                                local entityTag = group.entities[i]
+                                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                                local entityTag = (group and group.entities or {})[i]
                                                                 local obj = getEntityFromManager(entityTag)
                                                                 if(#action.action > 0) then
                                                                 
@@ -2401,8 +2502,8 @@ function executeAction(action,tag,parent,index,source,executortag)
 
                                 if(action.name == "attitude_group_against_entity") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
                                                 checkAttitudeCounter(obj)
 
@@ -2427,8 +2528,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "attitude_group_against_group") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 
                                                 
                                                 local obj = getEntityFromManager(entityTag)
@@ -2447,10 +2548,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "play_group_voice") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         talk(enti,action.voice)
                                                 end
@@ -2458,10 +2559,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "play_group_facial") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 local reaction = getExpression(action.value)
                                                 if(enti ~= nil) then
                                                         makeFacial(enti,reaction)
@@ -2470,10 +2571,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "reset_group_facial") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         resetFacial(enti)
                                                 end
@@ -2482,10 +2583,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "look_at_entity_group") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         if(action.entity == "player") then
                                                                 lookAtPlayer(enti)
@@ -2497,11 +2598,11 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "execute_at_script_level_group") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
                                                 
-                                                local entityTag = group.entities[i]
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         if(obj.scriptlevel == nil or obj.scriptlevel <= action.scriptlevel) then
                                                                 
@@ -2514,10 +2615,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "ressurect_group") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         
                                                         local sp = Game.GetScriptableSystemsContainer():Get(CName.new("ScriptedPuppet"))
@@ -2531,11 +2632,11 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_script_level_group") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
                                                 
-                                                local entityTag = group.entities[i]
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         obj.scriptlevel = action.scriptlevel 
                                                 end
@@ -2545,11 +2646,11 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "apply_effect_to_group") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
                                                 print(obj.tag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         StatusEffectHelper.ApplyStatusEffectForTimeWindow(enti, TweakDBID.new(action.value),obj.id, 0,1000)
                                                 end
@@ -2557,10 +2658,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "remove_effect_to_group") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         StatusEffectHelper.RemoveStatusEffect(enti, TweakDBID.new(action.value))
                                                 end
@@ -2854,7 +2955,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         -- (and action.position via getPositionFromParameter), defaulting
                                         -- to the historical values so existing JSON actions keep working.
                                         local vehiculeobj =  getEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(vehicule ~= nil) then
                                                 local minspeed = action.minspeed or action.min_speed or 1
                                                 local maxspeed = action.maxspeed or action.max_speed or 5
@@ -2869,7 +2970,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "vehicle_go_to_position") then
                                         local vehiculeobj =  getTrueEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(vehicule ~= nil) then
                                                 
                                                 
@@ -2884,7 +2985,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 
                                 if(action.name == "vehicle_cancel_last_cmd") then
                                         local vehiculeobj =  getTrueEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(vehicule ~= nil) then
                                                 
                                                 
@@ -2898,7 +2999,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 
                                 if(action.name == "vehicle_toggle_collision") then
                                         local vehiculeobj =  getTrueEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(vehicule ~= nil) then
                                                 
                                                 
@@ -2914,7 +3015,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "vehicle_go_to_current_fasttravel_point") then
                                         local vehiculeobj =  getTrueEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(vehicule ~= nil and ActiveFastTravelMappin ~= nil) then
                                                 
                                                 vehiculeobj.destination = ActiveFastTravelMappin.position
@@ -2924,7 +3025,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "vehicle_go_to_current_mappin_point") then
                                         local vehiculeobj =  getTrueEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(vehicule ~= nil and mappinManager["selected_mappin"] ~= nil) then
                                                 
                                                 
@@ -2937,7 +3038,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "vehicle_go_to_fasttravel_point") then
                                         local vehiculeobj =  getEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(vehicule ~= nil) then
                                                 local markerref = nil
                                                 local position = nil
@@ -2957,7 +3058,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "vehicle_go_to_fasttravel_point_from_mappin") then
                                         local mappin = getMappinByTag(tag)
                                         local vehiculeobj =  getTrueEntityFromManager(action.tag)
-                                        local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        local vehicule = safeFindEntityByID(vehiculeobj.id)
                                         if(mappin)then
                                                 if(vehicule ~= nil) then
                                                         vehiculeobj.destination =position
@@ -3257,7 +3358,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "set_item") then
                                         if grabbedTarget ~= nil then
                                                 --      tp:Teleport(grabbedTarget, targetPos, targetAngle)
-                                                -- if(Game.FindEntityByID(selectedItem.entityId):IsA('gameObject') == false)then
+                                                -- if(safeFindEntityByID(selectedItem.entityId):IsA('gameObject') == false)then
                                                 -- grabbedTarget:Destroy()
                                                 -- end
                                                 updateItemPosition(selectedItem, targetPos, targetAngle,true)
@@ -3302,7 +3403,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         if selectedItem ~= nil then
                                                 enabled = true
                                                 id = true
-                                                grabbedTarget = Game.FindEntityByID(selectedItem.entityId)
+                                                grabbedTarget = safeFindEntityByID(selectedItem.entityId)
                                                 if(grabbedTarget:IsA('gameObject') == false)then
                                                         grabbedTarget = nil
                                                         grabbed = false
@@ -3343,8 +3444,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                         if(mitems.Id == action.value) then
                                                                 selectedItem = nil
                                                                 selectedItem = mitems
-                                                                if(selectedItem.entityId ~= nil and Game.FindEntityByID(selectedItem.entityId) ~=nil and Game.FindEntityByID(selectedItem.entityId):IsA('gameObject') == true)then
-                                                                        grabbedTarget = Game.FindEntityByID(selectedItem.entityId)
+                                                                if(selectedItem.entityId ~= nil and safeFindEntityByID(selectedItem.entityId) ~=nil and safeFindEntityByID(selectedItem.entityId):IsA('gameObject') == true)then
+                                                                        grabbedTarget = safeFindEntityByID(selectedItem.entityId)
                                                                         enabled = true
                                                                         id = true
                                                                         if (grabbedTarget ~= nil) then
@@ -3383,7 +3484,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "move_selected_item_Z") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         local objpos = entity:GetWorldPosition()
                                                         local worldpos = Game.GetPlayer():GetWorldTransform()
@@ -3396,7 +3497,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "move_selected_item_X") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         local objpos = entity:GetWorldPosition()
                                                         local worldpos = Game.GetPlayer():GetWorldTransform()
@@ -3409,7 +3510,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "move_selected_item_Y") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         local objpos = entity:GetWorldPosition()
                                                         local worldpos = Game.GetPlayer():GetWorldTransform()
@@ -3422,7 +3523,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "yaw_selected_item") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         local objpos = entity:GetWorldPosition()
                                                         local worldpos = Game.GetPlayer():GetWorldTransform()
@@ -3435,7 +3536,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "roll_selected_item") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         local objpos = entity:GetWorldPosition()
                                                         local worldpos = Game.GetPlayer():GetWorldTransform()
@@ -3448,7 +3549,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "pitch_selected_item") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         local objpos = entity:GetWorldPosition()
                                                         local worldpos = Game.GetPlayer():GetWorldTransform()
@@ -3461,12 +3562,12 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "selected_item_remove") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         for i =1, #currentSave.arrayPlayerItems do
                                                                 local mitem = currentSave.arrayPlayerItems[i]
                                                                 if(mitem.Tag == selectedItem.Tag) then
-                                                                        Game.FindEntityByID(selectedItem.entityId):GetEntity():Destroy()
+                                                                        safeFindEntityByID(selectedItem.entityId):GetEntity():Destroy()
                                                                         logme(3,"toto")
                                                                         updatePlayerItemsQuantity(mitem,1)
                                                                         deleteHousing(selectedItem.Id)
@@ -3506,7 +3607,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                         spawnedItem.Id = housing.Id
                                                         updatePlayerItemsQuantity(mitems,-1)
                                                         spawnedItem.entityId = spawnItem(spawnedItem, pos, angles)
-                                                        local entity = Game.FindEntityByID(spawnedItem.entityId)
+                                                        local entity = safeFindEntityByID(spawnedItem.entityId)
                                                         local components = checkForValidComponents(entity)
                                                         if components then
                                                                 local visualScale = checkDefaultScale(components)
@@ -3570,7 +3671,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "scale_selected_item") then
                                         if selectedItem ~= nil then
-                                                local entity = Game.FindEntityByID(selectedItem.entityId)
+                                                local entity = safeFindEntityByID(selectedItem.entityId)
                                                 if(entity ~= nil) then
                                                         local values = Vector3.new(action.x, action.y, action.z)
                                                         setItemScale(entity, values)
@@ -4149,7 +4250,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "quest_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4334,7 +4435,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "contact_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4376,7 +4477,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "location_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4414,7 +4515,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "codex_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4452,7 +4553,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "activity_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4491,7 +4592,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "authorization_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4531,7 +4632,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "hacking_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4569,7 +4670,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "phone_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4639,7 +4740,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "phone_news_notification") then
                                         local test = getLang(action.title)
                                         local obj = getEntityFromManager(action.title)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(action.title == "lookat")then
                                                 enti = objLook
                                         end
@@ -4905,7 +5006,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 action.tag = "player"
                                         end
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         
                                         if(enti ~= nil) then
                                                 Game.GetStatPoolsSystem():RequestSettingStatPoolValue(enti:GetEntityID(), Enum.new('gamedataStatPoolType', action.value), action.score, Game.GetPlayer(), action.perc);
@@ -4922,7 +5023,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 action.tag = "player"
                                         end
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         
                                         if(enti ~= nil) then
                                                 Game.GetStatPoolsSystem():RequestSettingStatPoolMaxValue(enti:GetEntityID(), Enum.new('gamedataStatPoolType', action.value), Game.GetPlayer());
@@ -5091,7 +5192,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                 local obj = getEntityFromManager(action.position_tag)
                                                                 local enti = Game.GetPlayer()
                                                                 if(action.position_tag ~= "player") then 
-                                                                        enti = Game.FindEntityByID(obj.id)
+                                                                        enti = safeFindEntityByID(obj)
                                                                 end
                                                                 if(enti ~= nil) then
                                                                         registerMappintoEntity(enti,action.tag,action.typemap,action.wall,action.active,action.mapgroup,nil,action.title,action.desc,action.color,action.icon)
@@ -5105,10 +5206,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 if(action.position == "on_group")then
                                                         local group =getGroupfromManager(action.position_tag)
                                                         if group ~= nil then
-                                                                for i=1, #group.entities do 
-                                                                        local entityTag = group.entities[i]
+                                                                for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                                        local entityTag = (group and group.entities or {})[i]
                                                                         local obj = getEntityFromManager(entityTag)
-                                                                        local enti = Game.FindEntityByID(obj.id)
+                                                                        local enti = safeFindEntityByID(obj)
                                                                         if(enti ~= nil) then
                                                                                 local mapTag = action.position_tag.."_"..i
                                                                                 registerMappintoEntity(enti,mapTag,action.typemap,action.wall,action.active,action.mapgroup,action.title,action.desc,action.color,action.icon)
@@ -5141,7 +5242,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                 local obj = getEntityFromManager(action.position_tag)
                                                                 local enti = Game.GetPlayer()
                                                                 if(action.position_tag ~= "player") then 
-                                                                        enti = Game.FindEntityByID(obj.id)
+                                                                        enti = safeFindEntityByID(obj)
                                                                 end
                                                                 if(enti ~= nil) then
                                                                         editMappin(enti,action.tag,action.typemap,action.wall,action.active,action.mapgroup,nil,action.title,action.desc,action.color,action.icon)
@@ -5156,10 +5257,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 if(action.position == "on_group")then
                                                         local group =getGroupfromManager(action.position_tag)
                                                         if group ~= nil then
-                                                                for i=1, #group.entities do 
-                                                                        local entityTag = group.entities[i]
+                                                                for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                                        local entityTag = (group and group.entities or {})[i]
                                                                         local obj = getEntityFromManager(entityTag)
-                                                                        local enti = Game.FindEntityByID(obj.id)
+                                                                        local enti = safeFindEntityByID(obj)
                                                                         if(enti ~= nil) then
                                                                                 local mapTag = action.position_tag.."_"..i
                                                                                 
@@ -5294,7 +5395,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "loot_item") then
                                         
                                         local obj = getEntityFromManager(action.target)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         
                                         if(action.target == "lookat" )then
                                                 enti = objLook
@@ -6066,7 +6167,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         if(GameController["ChattersGameController"] ~= nil) then
                                                 local linesToShow = {}
                                                 local obj = getEntityFromManager(action.target)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(action.target == "lookat")then
                                                         enti = objLook
                                                 end
@@ -6124,7 +6225,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 local linesToShow = {}
                                                 local tago = math.random(1,#action.title)
                                                 local obj = getEntityFromManager(action.target)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(action.target == "lookat")then
                                                         enti = objLook
                                                 end
@@ -6358,7 +6459,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_entity_node_current_auto") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         local positionVec4 = enti:GetWorldPosition()
                                         obj.currentNode = getNodefromPosition(positionVec4.x, positionVec4.y, positionVec4.z, action.range)
                                 end
@@ -6423,7 +6524,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 --logme(3,#actionlist)
                                                 --doActionofIndex(actionlist,"interact",listaction,currentindex)
                                                 result = false
-                                                local path = getEntityFromManager(group.entities[1]).path
+                                                local path = getEntityFromManager((group and group.entities or {})[1]).path
                                                 if(path.reverse == false) then
                                                         for i=1,#path.locations do
                                                                 local trackpos = obj.path.locations[i]
@@ -6439,7 +6540,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                         direction.y = nexttrackpos.y-separate
                                                                         direction.z = nexttrackpos.z+action.zoffset
                                                                         direction.w = 1
-                                                                        local enti = Game.FindEntityByID(obj.id)
+                                                                        local enti = safeFindEntityByID(obj)
                                                                         if(enti ~= nil) then
                                                                                 local isplayer = false
                                                                                 if entityTag == "player" then
@@ -6492,7 +6593,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                                 direction.y = nexttrackpos.y-separate
                                                                                 direction.z = nexttrackpos.z+action.zoffset
                                                                                 direction.w = 1
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 if(enti ~= nil) then
                                                                                         local isplayer = false
                                                                                         if entityTag == "player" then
@@ -6562,7 +6663,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                         direction.y = nexttrackpos.y-separate
                                                                         direction.z = nexttrackpos.z+action.zoffset
                                                                         direction.w = 1
-                                                                        local enti = Game.FindEntityByID(obj.id)
+                                                                        local enti = safeFindEntityByID(obj)
                                                                         if(enti ~= nil) then
                                                                                 local isplayer = false
                                                                                 if action.tag == "player" then
@@ -6622,7 +6723,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                                 direction.y = nexttrackpos.y-separate
                                                                                 direction.z = nexttrackpos.z+action.zoffset
                                                                                 direction.w = 1
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 if(enti ~= nil) then
                                                                                         local isplayer = false
                                                                                         if action.tag == "player" then
@@ -6718,7 +6819,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "teleport_entity_at_node") then
                                         local node = getNode(action.data)
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         local isplayer = false
                                         if(action.tag == "player") then
                                                 enti = Game.GetPlayer()
@@ -6735,7 +6836,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "teleport_entity_at_current_node") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         local isplayer = false
                                         if(action.tag == "player") then
                                                 enti = Game.GetPlayer()
@@ -6782,8 +6883,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_group_circuit") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 logme(3,entityTag)
                                                 logme(3,action.circuit)
                                                 local obj = getEntityFromManager(entityTag)
@@ -6798,8 +6899,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_group_node_current") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getTrueEntityFromManager(entityTag)
                                                 obj.currentNode = getNode(action.data)
                                                 setEntityFromManager(entityTag,obj)
@@ -6807,11 +6908,11 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_group_node_current_auto") then
                                         local group =getGroupfromManager(action.tag)
-                                        logme(3,"test.."..#group.entities)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        logme(3,"test.."..#(group and (group and group.entities or {}) or {}))
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getTrueEntityFromManager(entityTag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 local positionVec4 = enti:GetWorldPosition()
                                                 obj.currentNode = getNodefromPosition(positionVec4.x, positionVec4.y, positionVec4.z, action.range)
                                                 logme(3,"currentNode "..obj.currentNode.tag)    
@@ -6820,8 +6921,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_group_node_next") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
                                                 if(obj.circuit.reverse == false ) then
                                                         local nextNodeIndex = getNodeIndexFromCircuit(action.data,obj.circuit.datas)
@@ -6835,9 +6936,9 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_group_node_next_auto") then
                                         local group =getGroupfromManager(action.tag)
-                                        logme(3,"test.."..#group.entities)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        logme(3,"test.."..#(group and (group and group.entities or {}) or {}))
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getTrueEntityFromManager(entityTag)
                                                 logme(3,"currentNode "..obj.currentNode.tag)    
                                                 logme(3,#obj.circuit)
@@ -6858,8 +6959,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_group_node_path") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
                                                 obj.path = getPath(action.path)
                                                 if(obj.path == nil) then
@@ -6878,8 +6979,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_group_node_path_auto") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
                                                 logme(3,obj.currentNode.tag)
                                                 logme(3,obj.nextNode.tag)
@@ -6909,11 +7010,11 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         --logme(3,#actionlist)
                                         --doActionofIndex(actionlist,"interact",listaction,currentindex)
                                         result = false
-                                        local path = getEntityFromManager(group.entities[1]).path
+                                        local path = getEntityFromManager((group and group.entities or {})[1]).path
                                         if(path.reverse == false) then
                                                 for i=1,#path.locations do
-                                                        for y=1, #group.entities do 
-                                                                local entityTag = group.entities[y]
+                                                        for y=1, #(group and (group and group.entities or {}) or {}) do 
+                                                                local entityTag = (group and group.entities or {})[y]
                                                                 local obj = getEntityFromManager(entityTag)
                                                                 if(obj ~= nil) then
                                                                         local trackpos = obj.path.locations[i]
@@ -6929,7 +7030,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                                 direction.y = nexttrackpos.y-separate
                                                                                 direction.z = nexttrackpos.z+action.zoffset
                                                                                 direction.w = 1
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 if(enti ~= nil) then
                                                                                         local isplayer = false
                                                                                         if entityTag == "player" then
@@ -6974,8 +7075,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 end
                                                 else
                                                 for i= #path.locations, 1,-1 do
-                                                        for y=1, #group.entities do 
-                                                                local entityTag = group.entities[y]
+                                                        for y=1, #(group and (group and group.entities or {}) or {}) do 
+                                                                local entityTag = (group and group.entities or {})[y]
                                                                 local obj = getEntityFromManager(entityTag)
                                                                 if(obj ~= nil) then
                                                                         local trackpos = obj.path.locations[i]
@@ -6991,7 +7092,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                                 direction.y = nexttrackpos.y-separate
                                                                                 direction.z = nexttrackpos.z+action.zoffset
                                                                                 direction.w = 1
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 if(enti ~= nil) then
                                                                                         local isplayer = false
                                                                                         if entityTag == "player" then
@@ -7051,8 +7152,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         local path =  getPath(action.path)
                                         if(path.reverse == false) then
                                                 for i=1,#path.locations do
-                                                        for y=1, #group.entities do 
-                                                                local entityTag = group.entities[y]
+                                                        for y=1, #(group and (group and group.entities or {}) or {}) do 
+                                                                local entityTag = (group and group.entities or {})[y]
                                                                 local obj = getEntityFromManager(entityTag)
                                                                 if(obj ~= nil) then
                                                                         local trackpos = path.locations[i]
@@ -7068,7 +7169,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                                 direction.y = nexttrackpos.y-separate
                                                                                 direction.z = nexttrackpos.z+action.zoffset
                                                                                 direction.w = 1
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 if(enti ~= nil) then
                                                                                         local isplayer = false
                                                                                         if entityTag == "player" then
@@ -7104,8 +7205,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 end
                                                 else
                                                 for i= #path.locations, 1,-1 do
-                                                        for y=1, #group.entities do 
-                                                                local entityTag = group.entities[y]
+                                                        for y=1, #(group and (group and group.entities or {}) or {}) do 
+                                                                local entityTag = (group and group.entities or {})[y]
                                                                 local obj = getEntityFromManager(entityTag)
                                                                 if(obj ~= nil) then
                                                                         local trackpos = path.locations[i]
@@ -7121,7 +7222,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                                 direction.y = nexttrackpos.y-separate
                                                                                 direction.z = nexttrackpos.z+action.zoffset
                                                                                 direction.w = 1
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 if(enti ~= nil) then
                                                                                         local isplayer = false
                                                                                         if entityTag == "player" then
@@ -7169,8 +7270,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "clean_group_circuit") then
                                         local group =getGroupfromManager(action.tag)
                                         if group ~= nil then
-                                                for i=1, #group.entities do 
-                                                        local entityTag = group.entities[i]
+                                                for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                        local entityTag = (group and group.entities or {})[i]
                                                         local obj = getEntityFromManager(entityTag)
                                                         if(obj ~= nil) then
                                                                 obj.path = nil
@@ -7183,8 +7284,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "group_look_at_next_path_position") then
                                         local group =getGroupfromManager(action.tag)
-                                        for i=1, #group.entities do 
-                                                local entityTag = group.entities[i]
+                                        for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                local entityTag = (group and group.entities or {})[i]
                                                 local obj = getEntityFromManager(entityTag)
                                                 if(obj ~= nil) then
                                                         local trackpos = obj.path.locations[obj.path.index]
@@ -7203,7 +7304,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                 direction.y = nexttrackpos.y-separate
                                                                 direction.z = nexttrackpos.z+action.zoffset
                                                                 direction.w = 1
-                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                local enti = safeFindEntityByID(obj)
                                                                 if(enti ~= nil) then
                                                                         local isplayer = false
                                                                         if entityTag == "player" then
@@ -7334,7 +7435,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                         else
                                                                         local obj = getEntityFromManager(action.target)
                                                                         if(obj ~= nil) then
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 
                                                                                 if(enti ~= nil) then
                                                                                         
@@ -7448,7 +7549,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                         else
                                                                         local obj = getEntityFromManager(action.target)
                                                                         if(obj ~= nil) then
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 
                                                                                 if(enti ~= nil) then
                                                                                         
@@ -7507,7 +7608,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "change_radio_index") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 ps.activeStation = action.value
@@ -7518,7 +7619,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "change_tv_index") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 
@@ -7529,7 +7630,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "device_turn_on") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 
@@ -7540,7 +7641,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "device_turn_off") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 
@@ -7552,7 +7653,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "device_glitch_on") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 
@@ -7564,7 +7665,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "device_stop_using") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 
@@ -7574,7 +7675,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "device_start_using") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 
@@ -7584,7 +7685,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "device_glitch_off") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local ps = enti:GetDevicePS()
                                                 
@@ -7599,7 +7700,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 if(GameController["ChattersGameController"] ~= nil) then
                                                         local linesToShow = {}
                                                         local obj = getEntityFromManager(action.target)
-                                                        local enti = Game.FindEntityByID(obj.id)
+                                                        local enti = safeFindEntityByID(obj)
                                                         if(action.target == "lookat")then
                                                                 enti = objLook
                                                         end
@@ -7663,7 +7764,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                         else
                                                                         local obj = getEntityFromManager(action.target)
                                                                         if(obj ~= nil) then
-                                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                                local enti = safeFindEntityByID(obj)
                                                                                 
                                                                                 if(enti ~= nil) then
                                                                                         
@@ -8042,11 +8143,13 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                 if(cyberscript.GroupManager[action.group] ~= nil) then
                                                                         table.insert(cyberscript.GroupManager[action.group].entities,tag)
                                                                         else
-                                                                        error("group with tag : "..action.group.." doesn't exist")
+                                                                        -- B-23 fix: don't error() — log and skip. Aborting the whole action list on a missing group is too harsh.
+                                                                        logme(2, "[Cyberscript] spawn_npc: group with tag '" .. tostring(action.group) .. "' doesn't exist; skipping group assignment")
                                                                 end
                                                         end
                                                         else
-                                                        error("bad character or position. character tweak : "..chara.." position : "..dump(position))
+                                                        -- B-23 fix: don't error() — log and skip. The mod's JSON referenced an invalid character tweak or position; skip this single spawn instead of crashing the whole script.
+                                                        logme(1, "[Cyberscript] spawn_npc: bad character or position. character tweak: " .. tostring(chara) .. " position: " .. tostring(position and dump(position) or "nil"))
                                                 end
                                         end
                                 end
@@ -8069,7 +8172,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_component_hidden") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local components = enti:GetComponents();
                                                 for i,component in ipairs(components) do
@@ -8094,7 +8197,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "clone_entity") then
                                         local obj = getEntityFromManager(action.target)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 
                                                 local postp = enti:GetWorldPosition()
@@ -8158,7 +8261,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                 
                                                                 -- if isprevention == true then
                                                                 -- local postp = Vector4.new( x, y, z,1)
-                                                                -- teleportTo(Game.FindEntityByID(NPC), postp, 1,false)
+                                                                -- teleportTo(safeFindEntityByID(NPC), postp, 1,false)
                                                                 -- end
                                                                 
                                                                 
@@ -8179,7 +8282,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "replace_entity") then
                                         local obj = getEntityFromManager(action.target)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 
                                                 local postp = enti:GetWorldPosition()
@@ -8243,7 +8346,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                 
                                                                 -- if isprevention == true then
                                                                 -- local postp = Vector4.new( x, y, z,1)
-                                                                -- teleportTo(Game.FindEntityByID(NPC), postp, 1,false)
+                                                                -- teleportTo(safeFindEntityByID(NPC), postp, 1,false)
                                                                 -- end
                                                                 
                                                                 
@@ -8263,7 +8366,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "change_entity_tag") then
                                         local obj = getEntityFromManager(action.target)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local entity = deepcopy(obj)
                                                 entity.id = enti:GetEntityID()
@@ -8276,7 +8379,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "push_force_entity") then
                                         local obj = getEntityFromManager(action.target)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 playerCamPos = Matrix.GetTranslation(Game.GetPlayer():GetFPPCameraComponent():GetLocalToWorld());
                                                 playerCamFwd = Matrix.GetDirectionVector(Game.GetPlayer():GetFPPCameraComponent():GetLocalToWorld());
@@ -8328,7 +8431,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 
                                 if(action.name == "pull_force_entity") then
                                         local obj = getEntityFromManager(action.target)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 playerCamPos = Matrix.GetTranslation(Game.GetPlayer():GetFPPCameraComponent():GetLocalToWorld());
                                                 playerCamFwd = Matrix.GetDirectionVector(Game.GetPlayer():GetFPPCameraComponent():GetLocalToWorld());
@@ -8686,7 +8789,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "register_entities_around_entity") then
                                         
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 targetingSystem = Game.GetTargetingSystem()
                                                 parts = {}
@@ -8842,7 +8945,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "kill_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 enti:OnDied()
                                                 -- local sp = GetSingleton("ScriptedPuppet")
@@ -8855,7 +8958,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "ressurect_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 
                                                 local sp = GetSingleton("ScriptedPuppet")
@@ -8871,7 +8974,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "set_entity_highlight") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 obj.isquest = action.value
                                                 enti:MarkAsQuest(obj.isquest)
@@ -8929,7 +9032,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "change_stance_entity") then 
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 changeStance(enti,action.value)
                                         end
@@ -8938,10 +9041,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if(action.name == "kill_group") then
                                         local group =getGroupfromManager(action.tag)
                                         if(group ~= nil) then
-                                                for i,v in ipairs(group.entities) do 
+                                                for i,v in ipairs((group and group.entities or {})) do 
                                                         local entityTag = v
                                                         local obj = getEntityFromManager(entityTag)
-                                                        local enti = Game.FindEntityByID(obj.id)
+                                                        local enti = safeFindEntityByID(obj)
                                                         if(enti ~= nil) then
                                                                 enti:OnDied()
                                                                 
@@ -8956,10 +9059,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 local actionlist = {}
                                                 
                                                 local group =getGroupfromManager(action.tag)
-                                                for i=1, #group.entities do 
-                                                        local entityTag = group.entities[i]
+                                                for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                        local entityTag = (group and group.entities or {})[i]
                                                         local obj = getEntityFromManager(entityTag)
-                                                        local enti = Game.FindEntityByID(obj.id)
+                                                        local enti = safeFindEntityByID(obj)
                                                         if(enti ~= nil) then
                                                                 
                                                                 local newaction = deepcopy(action)
@@ -8980,7 +9083,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 runActionList(actionlist, tag.."_move_grosssup"..tostring(math.random(1,987987)), "see",false,"",false)
                                                 else
                                                 local obj = getEntityFromManager(action.tag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         
                                                         local position = getPositionFromParameter(action)
@@ -9019,10 +9122,10 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         
                                         if(action.group == true ) then
                                                 local group =getGroupfromManager(action.tag)
-                                                for i=1, #group.entities do 
-                                                        local entityTag = group.entities[i]
+                                                for i=1, #(group and (group and group.entities or {}) or {}) do 
+                                                        local entityTag = (group and group.entities or {})[i]
                                                         local obj = getEntityFromManager(entityTag)
-                                                        local enti = Game.FindEntityByID(obj.id)
+                                                        local enti = safeFindEntityByID(obj)
                                                         if(enti ~= nil) then
                                                                 
                                                                 
@@ -9053,7 +9156,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 end
                                                 else
                                                 local obj = getEntityFromManager(action.tag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         local isplayer = false
                                                         if action.tag == "player" then
@@ -9093,7 +9196,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 obj = getEntityFromManagerById(objLook:GetEntityID())
                                                 else
                                                 obj = getEntityFromManager(action.tag)
-                                                enti = Game.FindEntityByID(obj.id)
+                                                enti = safeFindEntityByID(obj)
                                         end
                                         local stealth = false
                                         if(action.stealth == nil) then
@@ -9117,7 +9220,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         local obj = nil 
                                         
                                         obj = getEntityFromManager(action.tag)
-                                        enti = Game.FindEntityByID(obj.id)
+                                        enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 
                                                 InterruptBehavior(enti)
@@ -9128,19 +9231,19 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "rotate_entity_to_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local enti2 = Game.GetPlayer()
                                                 if(action.entity ~= "player") then
                                                         local obj2 = getEntityFromManager(action.entity)
-                                                        enti2 = Game.FindEntityByID(obj2.id)
+                                                        enti2 = safeFindEntityByID(obj2.id)
                                                 end
                                                 RotateTo(enti, enti2)
                                         end
                                 end
                                 if(action.name == "rotate_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 RotateEntityTo(enti, action.pitch, action.yaw, action.roll)
                                         end
@@ -9148,7 +9251,7 @@ function executeAction(action,tag,parent,index,source,executortag)
 
                                 if(action.name == "rotate_entity_relative") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
 
                                                 local qat = enti:GetWorldOrientation()
@@ -9183,7 +9286,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         if(position.x ~= nil) then
                                                 
                                                 local obj = getEntityFromManager(action.tag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 if(enti ~= nil) then
                                                         
                                                         RotateToXYZ(enti, position.x,position.y,position.z)
@@ -9205,7 +9308,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 enti = objLook
                                                 else
                                                 local obj = getEntityFromManager(action.tag)
-                                                enti = Game.FindEntityByID(obj.id)
+                                                enti = safeFindEntityByID(obj)
                                         end
                                         local stealth = false
                                         if(enti ~= nil) then
@@ -9222,7 +9325,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                         if(action.entity =="lookat") then 
                                                                 local id = enti:GetEntityID()
                                                                 Cron.After(5, function(id)
-                                                                        enti = Game.FindEntityByID(id)
+                                                                        enti = safeFindEntityByID(id)
                                                                         enti2 = objLook
                                                                         if(enti2 ~= nil) then
                                                                                 FollowEntity(enti, enti2, action.move, stealth)
@@ -9230,11 +9333,11 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                                 end)
                                                                 else
                                                                 local obj2 = getEntityFromManager(action.entity)
-                                                                enti2 = Game.FindEntityByID(obj2.id)
+                                                                enti2 = safeFindEntityByID(obj2.id)
                                                                 FollowEntity(enti, enti2, action.move, stealth)
                                                         end
                                                         if(action.entity =="target") then 
-                                                                enti2 = Game.FindEntityByID(selectTarget)
+                                                                enti2 = safeFindEntityByID(selectTarget)
                                                                 FollowEntity(enti, enti2, action.move, stealth)
                                                         end
                                                         else
@@ -9250,13 +9353,13 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         end
                                         
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         
                                         if(enti ~= nil) then
                                                 local positionVec4 = Game.GetPlayer():GetWorldPosition()
                                                 
                                                 local obj2 = getEntityFromManager(action.entity)
-                                                local enti2 = Game.FindEntityByID(obj2.id)
+                                                local enti2 = safeFindEntityByID(obj2.id)
                                                 if(enti2 ~= nil) then
                                                         positionVec4 = enti2:GetWorldPosition()
                                                         
@@ -9280,7 +9383,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 isplayer = true
                                         end
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local angle = 1
                                                 if(action.angle ~= nil) then
@@ -9327,7 +9430,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         end
                                         
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 local angle = 1
                                                 if(action.angle ~= nil) then
@@ -9358,7 +9461,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 obj = getEntityFromManagerById(objLook:GetEntityID())
                                                 else
                                                 obj = getEntityFromManager(action.tag)
-                                                enti = Game.FindEntityByID(obj.id)
+                                                enti = safeFindEntityByID(obj)
                                         end
                                         if(enti ~= nil and  enti:HasPrimaryOrSecondaryEquipment()) then
                                                 if obj.usePrimary == nil or true then
@@ -9380,7 +9483,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 obj = getEntityFromManagerById(objLook:GetEntityID())
                                                 else
                                                 obj = getEntityFromManager(action.tag)
-                                                enti = Game.FindEntityByID(obj.id)
+                                                enti = safeFindEntityByID(obj)
                                         end
                                         if(enti ~= nil and  enti:HasPrimaryOrSecondaryEquipment()) then
                                                 local es = Game.GetScriptableSystemsContainer():Get(CName.new("EquipmentSystem"))
@@ -9394,7 +9497,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         local enti = nil
                                         local obj = nil 
                                         obj = getEntityFromManager(action.tag)
-                                        enti = Game.FindEntityByID(obj.id)
+                                        enti = safeFindEntityByID(obj)
                                         if(enti ~= nil ) then
                                                 
                                                 if(action.tag =="player") then 
@@ -9413,7 +9516,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         local enti = nil
                                         local obj = nil 
                                         obj = getEntityFromManager(action.tag)
-                                        enti = Game.FindEntityByID(obj.id)
+                                        enti = safeFindEntityByID(obj)
                                         if(enti ~= nil ) then
                                                 
                                                 if(action.tag =="player") then 
@@ -9692,14 +9795,14 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "play_entity_voice") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 talk(enti,action.voice)
                                         end
                                 end
                                 if(action.name == "toggle_immortal_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 if(action.tag == "player") then
                                                         if (action.immortal == true) then
@@ -9836,14 +9939,14 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "reset_entity_facial") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 resetFacial(enti)
                                         end
                                 end
                                 if(action.name == "look_at_entity_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 if(action.entity == "player") then
                                                         lookAtPlayer(enti)
@@ -9854,14 +9957,14 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "reset_lookat_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 resetLookAt(enti)
                                         end
                                 end
                                 if(action.name == "player_look_at_entity") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 --print("tt")
                                                 local post = enti:GetWorldPosition()
@@ -9878,7 +9981,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                         Cron.Every(0.1, { done = false }, function(c)
                                                                 if c.done then return end
                                                                 local ent = getEntityFromManager(action.tag)
-                                                                local liveEntity = ent and Game.FindEntityByID(ent.id)
+                                                                local liveEntity = ent and safeFindEntityByID(ent.id)
                                                                 if liveEntity then
                                                                         local p = liveEntity:GetWorldPosition()
                                                                         playerLookAtDirection(p.x, p.y, p.z)
@@ -9980,7 +10083,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "set_entity_appearance") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 --logme(3,"go")
                                                 
@@ -10025,7 +10128,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 ApplyEffectOnPlayer(action.value)
                                                 else
                                                 local obj = getEntityFromManager(action.tag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 
                                                 StatusEffectHelper.ApplyStatusEffectForTimeWindow(enti, TweakDBID.new(action.value),obj.id, 0,1000)
                                         end
@@ -10067,7 +10170,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         
                                         local obj = getEntityFromManager(action.tag)
                                         if(obj ~= nil ) then
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 
                                                 if enti ~= nil then
                                                         
@@ -10080,7 +10183,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         
                                         local obj = getEntityFromManager(action.tag)
                                         if(obj ~= nil ) then
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 
                                                 if enti ~= nil then
                                                         
@@ -10123,7 +10226,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 if(action.name == "execute_at_script_level") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 if(obj.scriptlevel == nil or obj.scriptlevel <= action.scriptlevel) then
                                                         
@@ -10136,7 +10239,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "set_script_level") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 obj.scriptlevel = action.scriptlevel 
                                                 
@@ -10191,7 +10294,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                         local angles = EulerAngles.new(spawnedItem.Yaw,spawnedItem.Pitch,spawnedItem.Roll)
                                                         local posVec4 = Vector4.new(position.x, position.y, position.z,1)
                                                         spawnedItem.entityId = spawnItem(spawnedItem, posVec4, angles)
-                                                        local entity = Game.FindEntityByID(spawnedItem.entityId)
+                                                        local entity = safeFindEntityByID(spawnedItem.entityId)
                                                         local components = checkForValidComponents(entity)
                                                         if components then
                                                                 local visualScale = checkDefaultScale(components)
@@ -10250,7 +10353,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         --https://nativedb.red4ext.com/gamedataStatType
                                         --https://nativedb.red4ext.com/gameStatModifierType
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         
                                         if(enti ~= nil) then
                                                 
@@ -10735,7 +10838,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if action.name == "pause_entity_anim" then
                                         
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil and obj.animation ~= nil) then
                                                         
                                                         TimeDilationHelper.SetIndividualTimeDilation(enti, "see_engine", 0.0000000000001, 99999, "", "");
@@ -10748,7 +10851,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 if action.name == "resume_entity_anim" then
                                         
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil and obj.animation ~= nil and obj.workspot_name ~= nil) then
                                                 
                                                         
@@ -11626,14 +11729,14 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                                 if(action.name == "start_effect" or action.name == "start_effect_test") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 GameObjectEffectHelper.StartEffectEvent(enti, action.value)
                                         end
                                 end
                                 if(action.name == "stop_effect" or action.name == "stop_effect_test") then
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 GameObjectEffectHelper.StopEffectEvent(enti, action.value)
                                                 GameObjectEffectHelper.BreakEffectLoopEvent(enti, action.value)
@@ -12038,7 +12141,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                         local actionlist = {}
                                         
                                         local obj = getEntityFromManager(action.tag)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj)
                                         if(enti ~= nil) then
                                                 
                                                 
@@ -12157,7 +12260,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                                 local actionlist = {}
                                                 
                                                 local obj = getEntityFromManager(action.tag)
-                                                local enti = Game.FindEntityByID(obj.id)
+                                                local enti = safeFindEntityByID(obj)
                                                 local myPos = enti:GetWorldPosition()
                                                 local newPos = myPos
                                                 local angle = enti:GetWorldOrientation():ToEulerAngles()
@@ -13539,7 +13642,7 @@ function getPositionFromParameter(action)
                 
                 local obj = getEntityFromManager(action.position_tag)
                 if(obj.id ~= nil ) then 
-                        entity = Game.FindEntityByID(obj.id)
+                        entity = safeFindEntityByID(obj)
                         if(entity ~= nil ) then 
                                 positionVec4 = entity:GetWorldPosition()
                                 
@@ -13998,7 +14101,7 @@ function GenerateTextFromContextValues(context, v,source)
                 local group = getGroupfromManager(v.tag)
                 if(group ~= nil) then
                         
-                        value = #group.entities
+                        value = #(group and (group and group.entities or {}) or {})
                         
                         
                 end
@@ -14261,7 +14364,7 @@ function GenerateTextFromContextValues(context, v,source)
                 --      ----print(v.tag)
                 local obj = getEntityFromManager(v.tag)
                 if(obj.id ~= nil) then
-                        local enti = Game.FindEntityByID(obj.id)        
+                        local enti = safeFindEntityByID(obj)        
                         if(enti ~= nil) then
                                 
                                 if(v.key == "position") then
@@ -14284,7 +14387,7 @@ function GenerateTextFromContextValues(context, v,source)
                                         if(v.target == "entity") then
                                                 local obj = getEntityFromManager(v.targettag)
                                                 if(obj.id ~= nil) then
-                                                        local enti = Game.FindEntityByID(obj.id)        
+                                                        local enti = safeFindEntityByID(obj)        
                                                         if(enti ~= nil) then
                                                                 local pos = enti:GetWorldPosition()
                                                                 value = getDistance(pos, mappinManager[v.tag]["position"])
@@ -14602,7 +14705,7 @@ function GenerateTextFromContextValues(context, v,source)
                                         if(v.target == "entity") then
                                                 local obj = getEntityFromManager(v.targettag)
                                                 if(obj.id ~= nil) then
-                                                        local enti = Game.FindEntityByID(obj.id)        
+                                                        local enti = safeFindEntityByID(obj)        
                                                         if(enti ~= nil) then
                                                                 local pos = enti:GetWorldPosition()
                                                                 value = getDistance(pos, mappinManager[v.tag]["position"])

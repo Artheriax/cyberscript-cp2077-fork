@@ -299,6 +299,11 @@ function SaveLoading()
         
         
         debugLog = getUserSettingWithDefault("debugLog",debugLog)
+        -- B-23 fix: separate debug flag for entity/group lookup diagnostics.
+        -- Off by default (silent). Mod authors can enable it in the native
+        -- settings UI under "Script Settings" → "Debug Entity Lookups" to
+        -- see every nil/skipped entity reference in cyberscript.log.
+        debugEntityLookups = getUserSettingWithDefault("debugEntityLookups",false)
         showcyberscriptfixeronmap = getUserSettingWithDefault("showcyberscriptfixeronmap",showcyberscriptfixeronmap)
         
         logrecordlevel = getUserSettingWithDefault("logrecordlevel",logrecordlevel)
@@ -569,7 +574,7 @@ function DatapackLoading() --handle the loading and creation of cache for datapa
         
 end
 function initCore() --Setup session, mod/external observer and trigger mod core loading
-        logme(1, "[Cyberscript Init] initCore() started", true)
+        logme(1, "[Cyberscript Init] initCore() started — version 5.1.4-fork.2", true)
         isGameLoaded = Game.GetPlayer() and Game.GetPlayer():IsAttached() and not GetSingleton('inkMenuScenario'):GetSystemRequestsHandler():IsPreGame()
         if GetMod('AppearanceMenuMod') then 
                 AMM =  GetMod("AppearanceMenuMod")

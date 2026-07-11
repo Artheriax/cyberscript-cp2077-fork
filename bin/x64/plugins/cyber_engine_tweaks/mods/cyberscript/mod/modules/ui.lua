@@ -1256,6 +1256,14 @@ function makeNativeSettings()
                         updateUserSetting("debugLog", state)
                 end)
                 
+                -- B-23 fix: separate debug toggle for entity/group lookup diagnostics.
+                -- Mod authors: enable this to see every nil/skipped entity reference in cyberscript.log.
+                -- Off by default to keep the log clean for end users.
+                nativeSettings.addSwitch("/CM/script", "Debug Entity Lookups", "Log every nil/skipped entity reference (for mod authors debugging missing entities). Can impact performance.", debugEntityLookups, false, function(state)
+                        debugEntityLookups = state
+                        updateUserSetting("debugEntityLookups", state)
+                end)
+                
                 
                 
                 

@@ -4,6 +4,90 @@ All notable changes to this fork are documented here. Dates are in
 `Europe/Amsterdam` timezone. Bug IDs (`B-XX`) reference
 `research/bugs.md` in this repository.
 
+## [5.1.4-fork.2] — 2026-07-11
+
+Second iteration of the bug-fix pass. Includes all fixes from fork.1
+plus additional fixes discovered during in-game testing with
+Companions of Night City, Gangs of Night City, and Cyberscript Studio.
+
+### New fixes in fork.2
+
+- **B-21** (`modpack.lua`, `core.lua`, `see.lua`): Suppress "Record already
+  exists" log spam from `TweakDB:CloneRecord` / `TweakDB:CreateRecord`.
+  All 5 call sites now check `TweakDB:GetRecord(name) == nil` first and
+  are wrapped in `pcall`. Records are only created on first run; subsequent
+  runs skip silently.
+
+- **B-22** (`core.lua`): Fixed "Function 'IsA' context must be 'IScriptable'"
+  crash in the `GameUI.Listen` callback. The phone-controller check is now
+  wrapped in `pcall` so a stale controller reference during menu state
+  transitions can never crash the listener.
+
+- **B-23** (`see.lua`, `scripting.lua`): Comprehensive nil-guard pass for
+  entity and group lookups. This was the biggest class of runtime errors
+  during testing — mods reference entities/groups that don't exist (not
+  yet spawned, already despawned, or invalid tags), and Cyberscript crashed
+  the entire action list instead of skipping the bad reference.
+  - Added global `safeFindEntityByID(obj)` helper that wraps
+    `Game.FindEntityByID(obj.id)` in pcall and returns nil on any failure.
+    Replaced **all 136 occurrences** of `Game.FindEntityByID(obj.id)` in
+    `see.lua` with this helper.
+  - Fixed `getTrueEntityFromManager()` to return a stub `{id=nil, tag=tag}`
+    instead of crashing on `enti.tag` when the entity doesn't exist.
+  - Fixed `getGroupfromManager()` to safely return nil if GroupManager
+    or the group doesn't exist.
+  - Replaced all 79 `group.entities` reads with
+    `(group and group.entities or {})` so a nil group yields an empty
+    table instead of crashing.
+  - Replaced all 40 `#group.entities` length checks with
+    `#(group and group.entities or {})` for the same reason.
+  - Replaced both `error()` calls in `spawn_npc` with `logme()` so a bad
+    character/position or missing group logs a warning and skips the
+    single spawn, instead of aborting the entire action list.
+
+### Carried over from fork.1
+
+All 18 fixes from fork.1 are included:
+- B-01 (GameTime error), B-02 (stuck menus), B-03/B-18 (refresh throttle),
+  B-04/B-11 (vehicle spawn guards), B-05 (NoCombat cleanup), B-06/B-20
+  (legacy F-key files moved), B-07 (garage validation), B-08 (unfreeze_player),
+  B-09 (invisibility sync), B-10 (action aliases), B-12 (vehicle traffic params),
+  B-13 (api diagnostic logging), B-14 (interaction aliases), B-15 (gang-info
+  opt-in), B-19 (fork docs).
+
+### Critical fix discovered during testing
+
+- **db.sqlite3 must ship with the mod** — fork.1 mistakenly excluded
+  `db.sqlite3` from the zip, causing `no such table: Characters` to crash
+  `setupCore()` before `initCore()` could run. This made the entire settings
+  UI disappear and cascaded into per-frame `EntityManager is nil` errors.
+  fork.2 includes `db.sqlite3` (1.05 MB, 3,977 character records) and adds
+  an `ensureDBReady()` guard in `db.lua` so a missing/corrupt database
+  degrades gracefully instead of crashing the init chain.
+
+- **Init-chain race conditions** — added nil guards to `refreshModVariable`
+  and the vehicle-tracking block in `mainThread` so they skip silently if
+  `cyberscript.EntityManager` or `arrayDistricts` aren't initialized yet,
+  instead of throwing per-frame errors.
+
+- **`nativeSettings` nil-guard** in `buildnativesetting()` — if
+  `nativeSettings` isn't loaded yet (because `initCore()` hasn't run),
+  the function returns gracefully instead of crashing the refresh loop.
+
+- **`GameSession.Observe('Death')` pcall** — wrapped in pcall so it can
+  never abort the init chain if the CET version doesn't support it.
+
+- **Diagnostic logging** — added force-logged `[Cyberscript Init]` lines
+  throughout the init chain so future init failures are easy to trace.
+
+### Compatibility
+
+Still zero breaking API changes. All fixes are defensive (pcall wrappers,
+nil guards, log-and-skip instead of error-and-abort). Existing downstream
+mods continue to work without modification.
+
+---
+
 ## [5.1.4-fork.1] — 2026-07-11
 
 First bug-fix pass on top of upstream Cyberscript Core v5.1.4. Addresses

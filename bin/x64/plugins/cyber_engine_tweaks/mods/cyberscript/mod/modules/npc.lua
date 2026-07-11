@@ -13,7 +13,7 @@ if spawnRegion then
         function spawnAnimationWorkspot(entitytag,anim_cname,workspot,isinstant,unlockcamera,angle)
                 
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 
                 if(enti ~= nil) then
@@ -45,7 +45,7 @@ if spawnRegion then
                                 local NPC = exEntitySpawner.Spawn([[base\cyberscript\entity\workspot_anim.ent]], spawnTransform, '')
                                 
                                 Cron.Every(0.1, {tick = 1}, function(timer)
-                                        local ent = Game.FindEntityByID(NPC)
+                                        local ent = safeFindEntityByID(NPC)
                                         if ent then
                                                 -- stand_wall_lean180__rh_phone__ow__01
                                                 Game.GetWorkspotSystem():PlayInDeviceSimple(ent, enti, unlockcamera, workspot, nil, nil, 0, 1, nil)
@@ -92,9 +92,9 @@ if spawnRegion then
         
         function enterInWorkspot(entitytag,workspottag,workspot,unlockcamera)
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 local objwk = getEntityFromManager(workspottag)
-                local entiwk = Game.FindEntityByID(objwk.id)    
+                local entiwk = safeFindEntityByID(objwk.id)    
                 
                 if(enti ~= nil and entiwk ~= nil) then
                 
@@ -111,7 +111,7 @@ if spawnRegion then
         
         function playAnimInWorkspot(entitytag,anim_cname,isinstant)
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 
                 if(enti ~= nil) then
@@ -125,9 +125,9 @@ if spawnRegion then
         
         function stopWorkSpotAnims(entitytag)
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 local objwk = getEntityFromManager(workspottag)
-                local entiwk = Game.FindEntityByID(objwk.id)    
+                local entiwk = safeFindEntityByID(objwk.id)    
                 
                 if(enti ~= nil and entiwk ~= nil) then
                         Game.GetWorkspotSystem():StopInDevice(enti)
@@ -140,7 +140,7 @@ if spawnRegion then
                 print(anim_cname)
                 print(workspot)
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 
                 if(enti ~= nil) then
@@ -164,7 +164,7 @@ if spawnRegion then
                         if obj.workspot ~= nil and cyberscript.EntityManager[obj.workspot] ~= nil then
                                 
                                 local objwk = getEntityFromManager(obj.workspot)
-                                local entiwk = Game.FindEntityByID(objwk.id)
+                                local entiwk = safeFindEntityByID(objwk.id)
                                 
                                 if(angle ~= nil) then
                                         Game.GetTeleportationFacility():Teleport(entiwk, enti:GetWorldPosition(), EulerAngles.new(angle.roll, angle.pitch, angle.yaw))
@@ -183,7 +183,7 @@ if spawnRegion then
                                 
                                 Cron.Every(0.1, {tick = 1}, function(timer)
                                 
-                                        local ent = Game.FindEntityByID(NPC)
+                                        local ent = safeFindEntityByID(NPC)
                                         if ent then
                                                 
                                                 Game.GetWorkspotSystem():PlayInDeviceSimple(ent, enti, unlockcamera, workspot, nil, nil, 0, 1, nil)
@@ -238,7 +238,7 @@ if spawnRegion then
         function changeWorkSpotAnims(entitytag,anim_cname,isinstant)
                 
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 cyberscript.EntityManager[entitytag].animation = anim_cname
                                                         
@@ -256,12 +256,12 @@ if spawnRegion then
         function changeWorkSpot(entitytag,workspotEnttag,workspot,unlockcamera)
                 
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 cyberscript.EntityManager[entitytag].animation = nil
                                                         
                 cyberscript.EntityManager[entitytag].workspot_name = workspot
                 local objwk = getEntityFromManager(workspotEnttag)
-                local entiwk = Game.FindEntityByID(objwk.id)
+                local entiwk = safeFindEntityByID(objwk.id)
                 
                 if(enti ~= nil and entiwk ~= nil ) then
                         cyberscript.EntityManager[workspotEnttag].workspottag = workspot
@@ -275,11 +275,13 @@ if spawnRegion then
         function stopWorkSpotAnims(entitytag)
                 
                 local obj = getEntityFromManager(entitytag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj)
                 
-                cyberscript.EntityManager[entitytag].animation = nil
-                cyberscript.EntityManager[entitytag].workspot_ent = nil
-                cyberscript.EntityManager[entitytag].workspot_name = nil
+                if cyberscript.EntityManager[entitytag] then
+                        cyberscript.EntityManager[entitytag].animation = nil
+                        cyberscript.EntityManager[entitytag].workspot_ent = nil
+                        cyberscript.EntityManager[entitytag].workspot_name = nil
+                end
                 if(enti ~= nil) then
                         
                         
@@ -500,7 +502,7 @@ if spawnRegion then
                 local NPC = exEntitySpawner.Spawn([[base\cyberscript\entity\inkwidget.ent]], spawnTransform, '')
                 ----print("Spawned "..entname)
                 Cron.Every(0.1, {tick = 1}, function(timer)
-                        local ent = Game.FindEntityByID(NPC)
+                        local ent = safeFindEntityByID(NPC)
                         if ent then
                                 -- stand_wall_lean180__rh_phone__ow__01
                                 
@@ -556,7 +558,7 @@ if spawnRegion then
                 Cron.After(0.3, function()
                         local obj = getEntityFromManager(tag)
                         obj.surveillance = surveillance
-                        local enti = Game.FindEntityByID(obj.id)
+                        local enti = safeFindEntityByID(obj.id)
                         
                         if(enti ~= nil) then
                                 RotateEntityTo(enti, angle.pitch, angle.yaw, angle.roll)
@@ -585,7 +587,7 @@ if spawnRegion then
                 
                 
                 local obj = getEntityFromManager(tag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 if(enti ~= nil) then
                         --      teleportTo(enti, pos,angle, false)
@@ -623,7 +625,7 @@ if spawnRegion then
                 
                 
                 local obj = getEntityFromManager(tag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 
                 if(enti ~= nil) then
@@ -643,7 +645,7 @@ if spawnRegion then
         function stopCamera(tag)
                 
                 local obj = getEntityFromManager(tag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 
                 if(enti ~= nil) then
@@ -683,7 +685,7 @@ function despawnEntity(tag)
         
         local obj = getEntityFromManager(tag)
         
-        local enti = Game.FindEntityByID(obj.id)
+        local enti = safeFindEntityByID(obj.id)
         
         if enti ~= nil then
                 
@@ -751,7 +753,7 @@ function despawnAll()
                 
                 local enti = v
                 if(enti.isprevention ~= nil and enti.isprevention == false) then
-                        local np = Game.FindEntityByID(enti.id)
+                        local np = safeFindEntityByID(enti.id)
                         exEntitySpawner.Despawn(np)
                 end
                 
@@ -1177,7 +1179,7 @@ if actionRegion then
                 
                 
                 local obj = getEntityFromManager(tag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 local player = Game.GetPlayer()
                 local dirVector = diffVector(player:GetWorldPosition(), enti:GetWorldPosition())
@@ -1515,7 +1517,7 @@ if actionRegion then
                 
                 
                 local obj = getEntityFromManager(tag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 if(enti ~= nil) then
                         local stimReact = entity:GetStimReactionComponent()
@@ -1535,7 +1537,7 @@ if actionRegion then
         function IsMoving(tag)
                 
                 local obj = getEntityFromManager(tag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 return GetSingleton('AIbehaviorUniqueActiveCommandList'):IsActionCommandById(
                         targetPuppet:GetAIControllerComponent().activeCommands,
@@ -1557,7 +1559,7 @@ if actionRegion then
         function entityLookAtDirection(tag,x, y, z)
                 
                 local obj = getEntityFromManager(tag)
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 local direction = Vector4.new(x,y,z,1)
                 
@@ -1718,10 +1720,14 @@ if actionRegion then
         end
         
         function talk(enti,voiceText,target)
-                local StimReaction = enti:GetStimReactionComponent()
+                -- B-23 fix: wrap GetStimReactionComponent in pcall — some entities
+                -- don't have this component and calling the method throws.
+                local StimReaction = nil
+                pcall(function() StimReaction = enti:GetStimReactionComponent() end)
                 --local StimReaction = objlook:GetStimReactionComponent():ActivateReactionLookAt()
                 --resetFacial(enti)
-                local AnimationController = enti:GetAnimationControllerComponent()
+                local AnimationController = nil
+                pcall(function() AnimationController = enti:GetAnimationControllerComponent() end)
                 
                 
                 
@@ -1753,7 +1759,7 @@ if actionRegion then
                 local obj = getEntityFromManager(tag)
                 logme(10,dump(obj))
                 logme(10,dump(reactiontodo))
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 
                 local StimReaction = enti:GetStimReactionComponent()
                 
@@ -1810,7 +1816,7 @@ if actionRegion then
                         -- else
                         
                         -- local obj = getEntityFromManager(tag)
-                        -- local enti = Game.FindEntityByID(obj.id)
+                        -- local enti = safeFindEntityByID(obj.id)
                         
                         -- CreateTarget(enti, false, isHidden)
                         
@@ -1832,7 +1838,7 @@ if actionRegion then
                         
                         
                         obj = getEntityFromManager(tag)
-                        enti = Game.FindEntityByID(obj.id)
+                        enti = safeFindEntityByID(obj.id)
                         
                         
                 end
@@ -2047,7 +2053,7 @@ end
 if attitudeRegion then 
         function checkAttitudeCounter(obj)
                 
-                local enti = Game.FindEntityByID(obj.id)
+                local enti = safeFindEntityByID(obj.id)
                 if(enti ~= nil) then
                         
                                 if(enti:IsCrowd() and obj.attitudechanged == true) then
@@ -2121,7 +2127,7 @@ if attitudeRegion then
                         
                         obj = getEntityFromManager(tag)
                         
-                        enti = Game.FindEntityByID(obj.id)
+                        enti = safeFindEntityByID(obj.id)
                         
                         
                 end
@@ -2131,12 +2137,12 @@ if attitudeRegion then
                 if(target =="target") then 
                         
                         
-                        targets = Game.FindEntityByID(selectTarget)
+                        targets = safeFindEntityByID(selectTarget)
                         
                         else
                         
                         local obj2 = getEntityFromManager(target)
-                        targets = Game.FindEntityByID(obj2.id)
+                        targets = safeFindEntityByID(obj2.id)
                         
                         
                 end
@@ -2213,7 +2219,7 @@ if attitudeRegion then
                         
                         obj = getEntityFromManager(tag)
                         
-                        entity = Game.FindEntityByID(obj.id)
+                        entity = safeFindEntityByID(obj.id)
                         
                         
                 end
@@ -2264,7 +2270,7 @@ if attitudeRegion then
                         
                         obj = getEntityFromManager(tag)
                         
-                        entity = Game.FindEntityByID(obj.id)
+                        entity = safeFindEntityByID(obj.id)
                         
                         
                 end
@@ -2307,7 +2313,7 @@ if attitudeRegion then
                         
                         obj = getEntityFromManager(tag)
                         
-                        enti = Game.FindEntityByID(obj.id)
+                        enti = safeFindEntityByID(obj.id)
                         
                         
                         
@@ -2317,12 +2323,12 @@ if attitudeRegion then
                 if(target =="target") then 
                         
                         
-                        targets = Game.FindEntityByID(selectTarget)
+                        targets = safeFindEntityByID(selectTarget)
                         
                         else
                         
                         local obj2 = getEntityFromManager(target)
-                        targets = Game.FindEntityByID(obj2.id)
+                        targets = safeFindEntityByID(obj2.id)
                         
                         
                 end
@@ -2365,7 +2371,7 @@ if attitudeRegion then
                         
                         obj = getEntityFromManager(tag)
                         
-                        enti = Game.FindEntityByID(obj.id)
+                        enti = safeFindEntityByID(obj.id)
                         
                         
                         
@@ -2375,12 +2381,12 @@ if attitudeRegion then
                 if(target =="target") then 
                         
                         
-                        targets = Game.FindEntityByID(selectTarget)
+                        targets = safeFindEntityByID(selectTarget)
                         
                         else
                         
                         local obj2 = getEntityFromManager(target)
-                        targets = Game.FindEntityByID(obj2.id)
+                        targets = safeFindEntityByID(obj2.id)
                         
                         
                 end
@@ -2427,7 +2433,7 @@ if attitudeRegion then
                         
                         obj = getEntityFromManager(tag)
                         
-                        enti = Game.FindEntityByID(obj.id)
+                        enti = safeFindEntityByID(obj.id)
                         
                         
                 end
@@ -2439,12 +2445,12 @@ if attitudeRegion then
                         if(target =="target") then 
                                 
                                 
-                                targets = Game.FindEntityByID(selectTarget)
+                                targets = safeFindEntityByID(selectTarget)
                                 
                                 else
                                 
                                 local obj2 = getEntityFromManager(friendtag)
-                                targets = Game.FindEntityByID(obj2.id)
+                                targets = safeFindEntityByID(obj2.id)
                                 
                                 
                         end
@@ -2470,7 +2476,7 @@ if attitudeRegion then
                         local obj = getEntityFromManager(entityTag)
                         
                         
-                        local enti = Game.FindEntityByID(obj.id)
+                        local enti = safeFindEntityByID(obj.id)
                         
                         
                         
@@ -2527,7 +2533,7 @@ if attitudeRegion then
                                 local obj2 = getEntityFromManager(entityTag2)
                                 
                                 
-                                local target = Game.FindEntityByID(obj2.id)
+                                local target = safeFindEntityByID(obj2.id)
                                 if(target ~= nil) then
                                         targetAttAgent:SetAttitudeTowards(target:GetAttitudeAgent(), Enum.new("EAIAttitude", "AIA_Friendly"))
                                         --              reactionComp:TriggerCombat(target)
@@ -2555,7 +2561,7 @@ if attitudeRegion then
                         
                         checkAttitudeCounter(obj)
 
-                        local enti = Game.FindEntityByID(obj.id)
+                        local enti = safeFindEntityByID(obj.id)
                         
                         if(enti ~= nil) then
                                 ToggleImmortal(enti, false)
@@ -2613,7 +2619,7 @@ if attitudeRegion then
                                         local obj2 = getEntityFromManager(entityTag2)
                                         
                                         
-                                        local target = Game.FindEntityByID(obj2.id)
+                                        local target = safeFindEntityByID(obj2.id)
                                         
                                         if(target ~= nil) then
                                                 targetAttAgent:SetAttitudeTowards(target:GetAttitudeAgent(), Enum.new("EAIAttitude", "AIA_Hostile"))
@@ -2757,7 +2763,7 @@ if vehiculeRegion then
                                                                 
                                                                 -- if isprevention == true then
                                                                 -- local postp = Vector4.new( x, y, z,1)
-                                                                -- teleportTo(Game.FindEntityByID(NPC), postp, 1,false)
+                                                                -- teleportTo(safeFindEntityByID(NPC), postp, 1,false)
                                                                 -- end
                                                                 
                                                                 
@@ -2928,7 +2934,7 @@ if vehiculeRegion then
                                         entity.isAV = isAV
                                         entity.name = chara
                                         
-                                        local veh = Game.FindEntityByID(NPC)
+                                        local veh = safeFindEntityByID(NPC)
                                         entity.availableSeat = GetSeats(veh)
                                         --entity.availableSeat = {}
                                         entity.driver = {}
@@ -2936,7 +2942,7 @@ if vehiculeRegion then
                                         
                                         
                                         local postp = Vector4.new( x, y, z,1)
-                                        teleportTo(Game.FindEntityByID(NPC), postp, 1, false)
+                                        teleportTo(safeFindEntityByID(NPC), postp, 1, false)
                                         
                                         calledfromgarage = true
                                 end)
@@ -2974,7 +2980,7 @@ if vehiculeRegion then
                                 if(entitytag == "player") then
                                         
                                         entityobj = getEntityFromManager(entitytag)
-                                        entity = Game.FindEntityByID(entityobj.id)
+                                        entity = safeFindEntityByID(entityobj.id)
                                         
                                         else
                                         
@@ -2986,7 +2992,7 @@ if vehiculeRegion then
                                                 
                                                 
                                                 entityobj = getEntityFromManager(entitytag)
-                                                entity = Game.FindEntityByID(entityobj.id)
+                                                entity = safeFindEntityByID(entityobj.id)
                                                 
                                                 
                                         end
@@ -2995,7 +3001,7 @@ if vehiculeRegion then
                                 
                                 if(vehiculetag =="target") then 
                                         
-                                        vehicule = Game.FindEntityByID(selectTarget)
+                                        vehicule = safeFindEntityByID(selectTarget)
                                         
                                         vehiculeobj= {}
                                         
@@ -3015,7 +3021,7 @@ if vehiculeRegion then
                                         
                                         
                                         vehiculeobj =  getEntityFromManager(vehiculetag)
-                                        vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        vehicule = safeFindEntityByID(vehiculeobj.id)
                                         
                                         
                                 end
@@ -3157,17 +3163,17 @@ if vehiculeRegion then
                                 if(entitytag == "player") then
                                         
                                         entityobj = getEntityFromManager(entitytag)
-                                        entity = Game.FindEntityByID(entityobj.id)
+                                        entity = safeFindEntityByID(entityobj.id)
                                         
                                         else
                                         
                                         entityobj = getEntityFromManager(entitytag)
-                                        entity = Game.FindEntityByID(entityobj.id)
+                                        entity = safeFindEntityByID(entityobj.id)
                                         
                                 end
                                 
                                 local vehiculeobj =  getEntityFromManager(vehiculetag)
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 if(vehicule ~= nil and entity ~= nil) then
                                         
@@ -3340,7 +3346,7 @@ if vehiculeRegion then
                                 if entitytag ~= "player" then
                                         
                                         local entityobj = getEntityFromManager(entitytag)
-                                        entity = Game.FindEntityByID(entityobj.id)
+                                        entity = safeFindEntityByID(entityobj.id)
                                         
                                 end
                                 
@@ -3352,14 +3358,14 @@ if vehiculeRegion then
                                 if(vehiculetag =="target") then 
                                         
                                         
-                                        vehicule = Game.FindEntityByID(selectTarget)
+                                        vehicule = safeFindEntityByID(selectTarget)
                                         
                                         else
                                         
                                         vehiculeobj =  getEntityFromManager(vehiculetag)
                                         
                                         
-                                        vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        vehicule = safeFindEntityByID(vehiculeobj.id)
                                         
                                 end
                                 
@@ -3367,7 +3373,7 @@ if vehiculeRegion then
                                         
                                         local entity = objLook
                                         vehiculeobj = getEntityFromManagerById(objLook:GetEntityID())
-                                        vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        vehicule = safeFindEntityByID(vehiculeobj.id)
                                         
                                 end
                                 
@@ -3412,7 +3418,7 @@ if vehiculeRegion then
                                         
                                 end
                                 
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 
                                 
@@ -3455,7 +3461,7 @@ if vehiculeRegion then
                                         
                                 end
                                 
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 
                                 
@@ -3501,7 +3507,7 @@ if vehiculeRegion then
                                         
                                 end
                                 
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 if(vehiculeobj.lastcmd ~= nil) then
                                         vehicule:GetAIComponent():CancelCommand(vehiculeobj.lastcmd);
@@ -3529,7 +3535,7 @@ if vehiculeRegion then
                                         
                                 -- end
                                 
-                                -- local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                -- local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 -- if(toggle) then
 
@@ -3568,7 +3574,7 @@ if vehiculeRegion then
                                 if entitytag ~= "player" then
                                         
                                         local entityobj = getEntityFromManager(entitytag)
-                                        entity = Game.FindEntityByID(entityobj.id)
+                                        entity = safeFindEntityByID(entityobj.id)
                                         
                                 end
                                 
@@ -3580,7 +3586,7 @@ if vehiculeRegion then
                                 if(vehiculetag =="target") then 
                                         
                                         
-                                        vehicule = Game.FindEntityByID(selectTarget)
+                                        vehicule = safeFindEntityByID(selectTarget)
                                         
                                         else
                                         
@@ -3594,7 +3600,7 @@ if vehiculeRegion then
                                         
                                         local entity = objLook
                                         vehiculeobj = getEntityFromManagerById(objLook:GetEntityID())
-                                        vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                        vehicule = safeFindEntityByID(vehiculeobj.id)
                                         
                                 end
                                 
@@ -3632,7 +3638,7 @@ if vehiculeRegion then
                                         
                                 end
                                 
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 local getTargetPS = vehicule:GetVehiclePS()
                                 
@@ -3665,7 +3671,7 @@ if vehiculeRegion then
                                         
                                 end
                                 
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 if(untilstop) then
                                 vehicule:ForceBrakesUntilStoppedOrFor(duration)
                                 else
@@ -3685,7 +3691,7 @@ if vehiculeRegion then
                                         
                                 end
                                 
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 local getTargetPS = vehicule:GetVehiclePS()
                                 
@@ -3723,7 +3729,7 @@ if vehiculeRegion then
                                         
                                         
                                 end
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 vehicule:DetachAllParts()
                                 
                         end
@@ -3737,7 +3743,7 @@ if vehiculeRegion then
                                         
                                         
                                 end
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 local getTargetPS = vehicule:GetVehiclePS()
                                 local getTargetVC = vehicule:GetVehicleComponent()
@@ -3758,7 +3764,7 @@ if vehiculeRegion then
                                         
                                         
                                 end
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 
                                 local getTargetPS = vehicule:GetVehiclePS()
@@ -3782,7 +3788,7 @@ if vehiculeRegion then
                                         
                                         
                                 end
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 if(vehicule ~= nil) then
                                         
@@ -3797,7 +3803,7 @@ if vehiculeRegion then
                         function VehicleLights(vehiculetag, state)
                                 local vehiculeobj =  getEntityFromManager(vehiculetag)
                                 
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 local getTargetVC = vehicule:GetVehicleComponent()
                                 local getTargetVCPS = getTargetVC:GetVehicleControllerPS()
@@ -3816,7 +3822,7 @@ if vehiculeRegion then
                                         
                                         
                                 end
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 local getTargetVC = vehicule:GetVehicleComponent()
                                 local getTargetVCPS = getTargetVC:GetVehicleControllerPS()
                                 
@@ -3839,7 +3845,7 @@ if vehiculeRegion then
                                         
                                         
                                 end
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 local getTargetVC = vehicule:GetVehicleComponent()
                                 
@@ -3856,7 +3862,7 @@ if vehiculeRegion then
                                         
                                         
                                 end
-                                local vehicule = Game.FindEntityByID(vehiculeobj.id)
+                                local vehicule = safeFindEntityByID(vehiculeobj.id)
                                 
                                 if(vehicule ~= nil) then
                                         local getTargetVC = vehicule:GetVehicleComponent()

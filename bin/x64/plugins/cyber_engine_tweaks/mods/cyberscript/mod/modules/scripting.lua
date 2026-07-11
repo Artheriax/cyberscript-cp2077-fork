@@ -352,11 +352,11 @@ function mainThread(active)-- update event when mod is ready and in game (main t
                                         
                                         
                                         local obj = getEntityFromManager(k)
-                                        local enti = Game.FindEntityByID(obj.id)
+                                        local enti = safeFindEntityByID(obj.id)
                                         if(enti ~= nil) then
                                                 
                                                 local anchorobj = getEntityFromManager(v.anchor)
-                                                local anchorenti = Game.FindEntityByID(anchorobj.id)
+                                                local anchorenti = safeFindEntityByID(anchorobj.id)
                                                 if(anchorenti ~= nil) then
                                                         
                                                         local position = anchorenti:GetWorldPosition()
@@ -937,7 +937,7 @@ function inGameInit() -- init some function after save loaded
                         end
                 end
                 logme(1,"entid "..dump(entid))
-                if(cstag ~= "" and Game.FindEntityByID(entid):GetRecordID() ~= nil and cyberscript.entitieshash[tostring(Game.FindEntityByID(entid):GetRecordID().hash)] ~= nil)then
+                if(cstag ~= "" and safeFindEntityByID(entid):GetRecordID() ~= nil and cyberscript.entitieshash[tostring(safeFindEntityByID(entid):GetRecordID().hash)] ~= nil)then
                 
                         local entity = {}
                         entity.id = entid
@@ -945,7 +945,7 @@ function inGameInit() -- init some function after save loaded
                         entity.despawntimespan = os.time(os.date("!*t"))+0
                         entity.tag = cstag
                         entity.isitem = false
-                        entity.tweak = cyberscript.entitieshash[tostring(Game.FindEntityByID(entid):GetRecordID().hash)].entity_tweak
+                        entity.tweak = cyberscript.entitieshash[tostring(safeFindEntityByID(entid):GetRecordID().hash)].entity_tweak
                         --      print("tweak"..entity.tweak)
                         entity.isprevention = false
                         entity.iscodeware = true
@@ -2351,7 +2351,7 @@ function checkNPC()
                         local obj = getEntityFromManager(k)
                         
                         if(obj ~= nil and obj.id ~= nil) then 
-                                local enti = Game.FindEntityByID(obj.id)        
+                                local enti = safeFindEntityByID(obj.id)        
                                 
                                 
                                 if(enti ~= nil) then--entity exist 
@@ -2366,7 +2366,7 @@ function checkNPC()
                                                         if(npc.appeareance ~= nil or npc.appeareance ~= "" and cyberscript.cache["npc"][k].data.appearancesetted == false) then
                                                                 
                                                                 local obj = getEntityFromManager(npc.tag)
-                                                                local enti = Game.FindEntityByID(obj.id)
+                                                                local enti = safeFindEntityByID(obj.id)
                                                                 if(enti ~= nil) then
                                                                         
                                                                         
@@ -2821,7 +2821,7 @@ function CorrectAllPOI()
                                 poicorrectready = true
                                 -- if isprevention == true then
                                 -- local postp = Vector4.new( x, y, z,1)
-                                -- teleportTo(Game.FindEntityByID(NPC), postp, 1,false)
+                                -- teleportTo(safeFindEntityByID(NPC), postp, 1,false)
                                 -- end
                                 
                                 
@@ -4197,9 +4197,10 @@ function getScannerdataFromEntityOrGroupOfEntity(entity)
 end
 
 function getGroupfromManager(tag)
-        
-        
-        
+        -- B-23 fix: return nil gracefully if the group doesn't exist.
+        -- Callers that iterate group.entities should check for nil first;
+        -- the call sites in see.lua have been updated to do so.
+        if cyberscript == nil or cyberscript.GroupManager == nil then return nil end
         return cyberscript.GroupManager[tag]
         
         
@@ -5201,11 +5202,20 @@ function getEntityFromManager(tag)
 end
 
 function getTrueEntityFromManager(tag)
-        
-        
-        
+        -- B-23 fix: handle nil entity gracefully. The original code accessed
+        -- enti.tag without checking enti ~= nil, which crashed when the tag
+        -- didn't exist in cyberscript.EntityManager (mod referenced a
+        -- non-existent or already-despawned entity).
         local enti = cyberscript.EntityManager[tag]
-        
+        if enti == nil then
+                -- Entity not found — return a stub with nil id so callers
+                -- that check obj.id ~= nil will skip safely.
+                local stub = {}
+                stub.id = nil
+                stub.tag = tag
+                return stub
+        end
+
 
         if(tag ~= enti.tag) then
                 
