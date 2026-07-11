@@ -681,6 +681,20 @@ function LoadDataPackCache()
         -- using current names.
         applyLegacyInteractionAliases()
 
+        -- B-25 fix: rebuild the favorite-interactions dropdown now that
+        -- arrayDatapack is fully populated. Previously makefavoritesetting()
+        -- only ran from SaveLoading() which fires BEFORE ImportDataPack/
+        -- LoadDataPackCache populate arrayDatapack — so on first load the
+        -- dropdown was empty and selecting an item set favoriteInteractGroup
+        -- to nil. Calling it here (after arrayDatapack is populated) ensures
+        -- the dropdown is always correct, on first load AND on reloads.
+        if makefavoritesetting and nativeSettings then
+                local ok, err = pcall(function() makefavoritesetting() end)
+                if not ok then
+                        logme(1, "[Cyberscript] B-25: makefavoritesetting failed during LoadDataPackCache: " .. tostring(err))
+                end
+        end
+
 end
 
 -- B-14 fix: load legacy_interaction_aliases.json and register each old->new

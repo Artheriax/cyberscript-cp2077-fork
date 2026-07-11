@@ -1069,6 +1069,21 @@ function buildnativesetting()
 end
 
 function makefavoritesetting()
+        -- B-25 fix: skip if arrayDatapack is empty (first load, before
+        -- ImportDataPack/LoadDataPackCache populate it). The dropdown will
+        -- be built by the second call from LoadDataPackCache once data is
+        -- available. Without this guard, the first call builds an empty
+        -- dropdown and selecting an item sets favoriteInteractGroup to nil.
+        local hasDatapacks = false
+        if arrayDatapack then
+                for _ in pairs(arrayDatapack) do
+                        hasDatapacks = true
+                        break
+                end
+        end
+        if not hasDatapacks then
+                return
+        end
         if(nativeSettings.pathExists("CSKEYBIND/favorite")) then
                 nativeSettings["CSKEYBIND"].subcategories["favorite"] = nil
         end
