@@ -101,7 +101,12 @@ function mainThread(active)-- update event when mod is ready and in game (main t
                         end
                         
                         --refresh global variable
-                        refreshModVariable(refreshModVariabletg)
+                        -- Guard: refreshModVariable can fire before initCore completes
+                        -- (race condition), which throws "arrayDistricts is nil" and
+                        -- "EntityManager is nil" every frame. Skip if init hasn't finished.
+                        if cyberscript and cyberscript.EntityManager and arrayDistricts then
+                                refreshModVariable(refreshModVariabletg)
+                        end
                         --refresh widget controller
                         refreshUIWidgetController(true)
                         
@@ -198,7 +203,13 @@ function mainThread(active)-- update event when mod is ready and in game (main t
                         
                         
                         --Vehicle
-                        local playerVehicule = Game.GetPlayer():GetQuickSlotsManager():GetVehicleObject()
+                        -- Guard: cyberscript.EntityManager may be nil if mainThread fires
+                        -- before initCore completes (race condition). Skip the vehicle
+                        -- tracking block until EntityManager is ready.
+                        local playerVehicule = nil
+                        if cyberscript and cyberscript.EntityManager then
+                                playerVehicule = Game.GetPlayer():GetQuickSlotsManager():GetVehicleObject()
+                        end
                         
                         
                                 

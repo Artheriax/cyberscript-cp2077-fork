@@ -696,7 +696,7 @@ function applyLegacyInteractionAliases()
                 local contents = f:read("*a")
                 f:close()
                 if not contents or contents == "" then return end
-                local parsed = JSON.decode(contents)
+                local parsed = json.decode(contents)
                 if not parsed or not parsed.aliases then return end
                 local count = 0
                 for oldTag, newTag in pairs(parsed.aliases) do

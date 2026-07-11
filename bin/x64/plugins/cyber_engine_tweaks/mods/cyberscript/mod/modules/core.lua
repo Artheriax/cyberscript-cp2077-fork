@@ -366,8 +366,10 @@ function SaveLoading()
         
         loadModule()
         
+        logme(1, "[Cyberscript Init] SaveLoading() — about to call makeNativeSettings()", true)
         makeNativeSettings()
         makefavoritesetting()
+        logme(1, "[Cyberscript Init] SaveLoading() — makeNativeSettings() completed", true)
         print("save me")
 end
 -- ----------------------------------------------------------------------
@@ -542,6 +544,7 @@ function DatapackLoading() --handle the loading and creation of cache for datapa
         
 end
 function initCore() --Setup session, mod/external observer and trigger mod core loading
+        logme(1, "[Cyberscript Init] initCore() started", true)
         isGameLoaded = Game.GetPlayer() and Game.GetPlayer():IsAttached() and not GetSingleton('inkMenuScenario'):GetSystemRequestsHandler():IsPreGame()
         if GetMod('AppearanceMenuMod') then 
                 AMM =  GetMod("AppearanceMenuMod")
