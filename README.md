@@ -2,7 +2,7 @@
 
 A maintained fork of [Cyberscript](https://github.com/cyberscript77/release) for Cyberpunk 2077 — a framework that lets mod creators build quests, NPCs, vehicles, factions, and interactive scenes using JSON datapacks instead of REDscript.
 
-[![Version](https://img.shields.io/badge/version-5.1.7-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.1.8-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 [![Base](https://img.shields.io/badge/based%20on-cyberscript%20v5.1.4-orange)](https://github.com/cyberscript77/release)
 
@@ -110,13 +110,13 @@ See [CHANGELOG.md](CHANGELOG.md) for the full list of 23 fixes (B-01 through B-2
 
 ### For end users
 
-1. Download `cyberscript-cp2077-fork-5.1.7.zip`
+1. Download `cyberscript-cp2077-fork-5.1.8.zip`
 2. Back up your existing `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/` directory (if present)
 3. Extract the zip into your Cyberpunk 2077 game root, merging with the existing directory or use vortex
 4. Launch the game
 5. Check `bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/cyberscript.log` — you should see:
    ```
-   [Cyberscript Init] initCore() started — version 5.1.7
+   [Cyberscript Init] initCore() started — version 5.1.8
    ```
    This confirms you're on the fork version.
 
@@ -347,7 +347,7 @@ Every load now logs the init chain to `cyberscript.log`:
 [Cyberscript Init] setupCore() started
 [Cyberscript Init] setupCore: ModIsLoaded=true, setting up GameSession
 [Cyberscript Init] setupCore: about to call initCore()
-[Cyberscript Init] initCore() started — version 5.1.7
+[Cyberscript Init] initCore() started — version 5.1.8
 [Cyberscript Init] SaveLoading() — about to call makeNativeSettings()
 [Cyberscript Init] makeNativeSettings() called — building settings tabs
 [Cyberscript Init] SaveLoading() — makeNativeSettings() completed
