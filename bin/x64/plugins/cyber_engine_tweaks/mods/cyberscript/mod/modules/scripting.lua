@@ -2082,8 +2082,16 @@ function checkFixer()
                                 if cyberscript.EntityManager[currentfixer.tag] == nil then
                                         cyberscript.EntityManager[currentfixer.tag] = {}
                                         if currentfixer.appearance == nil then currentfixer.appearance = "" end
-                                spawnNPC(currentfixer.tweakid,currentfixer.appearance, currentfixer.tag, currentfixer.x, currentfixer.y, currentfixer.z, 42, false, false, nil, false, nil,0,true,true,true,true,true)
-                                logme(1,"Cyberscript : Spawn Fixer :"..currentfixer.tag)
+                                -- B-26 fix: only spawn the fixer NPC in the world if the
+                                -- user has not disabled it via "Show Cyberscript Fixer on Street".
+                                -- Map markers are controlled separately by showcyberscriptfixeronmap.
+                                -- Default: true (preserves existing behavior — fixers spawn on street).
+                                if showcyberscriptfixeronstreet ~= false then
+                                        spawnNPC(currentfixer.tweakid,currentfixer.appearance, currentfixer.tag, currentfixer.x, currentfixer.y, currentfixer.z, 42, false, false, nil, false, nil,0,true,true,true,true,true)
+                                        logme(1,"Cyberscript : Spawn Fixer :"..currentfixer.tag)
+                                else
+                                        logme(2,"Cyberscript : Fixer NPC spawn skipped (showcyberscriptfixeronstreet=false): "..currentfixer.tag)
+                                end
                                 end
                                 
                         

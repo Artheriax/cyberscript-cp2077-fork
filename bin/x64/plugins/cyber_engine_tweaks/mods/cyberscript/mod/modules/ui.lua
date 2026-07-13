@@ -1301,6 +1301,30 @@ function makeNativeSettings()
                         end
                 end)
                 
+                -- B-26 fix: separate toggle for spawning fixer NPCs on the street.
+                -- The "on Map" toggle above only controls map markers; this one
+                -- controls whether the actual NPC traders spawn in the world.
+                -- Default: true (preserves existing behavior).
+                nativeSettings.addSwitch("/CM/hud", "Show Cyberscript Fixer on Street", "Spawn the Cyberscript fixer NPCs (traders) in the world. Turn off to remove them from the streets (map markers are controlled separately).", showcyberscriptfixeronstreet, true, function(state)
+                        showcyberscriptfixeronstreet = state
+                        updateUserSetting("showcyberscriptfixeronstreet", state)
+                        -- If turned off, despawn any currently-spawned fixers so the
+                        -- change takes effect immediately without requiring a reload.
+                        if not state then
+                                pcall(function()
+                                        if cyberscript and cyberscript.cache and cyberscript.cache["fixer"] then
+                                                for k, v in pairs(cyberscript.cache["fixer"]) do
+                                                        local fixer = v.data
+                                                        if fixer and fixer.tag and cyberscript.EntityManager[fixer.tag] ~= nil then
+                                                                despawnEntity(fixer.tag)
+                                                                logme(2, "Cyberscript : Despawned fixer (street toggle off): " .. fixer.tag)
+                                                        end
+                                                end
+                                        end
+                                end)
+                        end
+                end)
+                
                 
                 
                 

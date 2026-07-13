@@ -305,6 +305,7 @@ function SaveLoading()
         -- see every nil/skipped entity reference in cyberscript.log.
         debugEntityLookups = getUserSettingWithDefault("debugEntityLookups",false)
         showcyberscriptfixeronmap = getUserSettingWithDefault("showcyberscriptfixeronmap",showcyberscriptfixeronmap)
+        showcyberscriptfixeronstreet = getUserSettingWithDefault("showcyberscriptfixeronstreet",showcyberscriptfixeronstreet)
         
         logrecordlevel = getUserSettingWithDefault("logrecordlevel",logrecordlevel)
 
@@ -574,7 +575,7 @@ function DatapackLoading() --handle the loading and creation of cache for datapa
         
 end
 function initCore() --Setup session, mod/external observer and trigger mod core loading
-        logme(1, "[Cyberscript Init] initCore() started — version 5.1.7", true)
+        logme(1, "[Cyberscript Init] initCore() started — version 5.1.9", true)
         isGameLoaded = Game.GetPlayer() and Game.GetPlayer():IsAttached() and not GetSingleton('inkMenuScenario'):GetSystemRequestsHandler():IsPreGame()
         if GetMod('AppearanceMenuMod') then 
                 AMM =  GetMod("AppearanceMenuMod")
