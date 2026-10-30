@@ -2877,7 +2877,14 @@ function WindowsItem()
                 ImGui.SetNextWindowPos(currentInterface.x, currentInterface.y, ImGuiCond.FirstUseEver) -- set window position x, y
                 ImGui.SetNextWindowSize(currentInterface.width, currentInterface.heigh, ImGuiCond.Appearing) -- set window size w, h
                 ImGui.SetWindowSize(currentInterface.width, currentInterface.heigh)
-                
+
+                -- CET 1.38 (game patch 2.5) only gives ImGui mouse and keyboard input while
+                -- the CET overlay is open, so tell the player how to use this window.
+                if not overlayOpen then
+                        ImGui.TextWrapped("Open the CET overlay to interact with this window.")
+                        ImGui.Spacing()
+                end
+
                 if ImGui.Button(lang.Close) then
                         openInterface = false
                 end

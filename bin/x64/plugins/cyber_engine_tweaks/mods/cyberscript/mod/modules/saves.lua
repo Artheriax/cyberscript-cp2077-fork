@@ -588,7 +588,12 @@ function setVariable(tag,key,score)
 		
 	end
 	
+	local old = currentSave.Variable[tag][key]
 	currentSave.Variable[tag][key] = score
+	
+	if cyberscriptExtensions ~= nil and old ~= score and cyberscriptExtensions.hasListeners("variable") then
+		cyberscriptExtensions.emit("variable", { tag = tag, key = key, old = old, new = score })
+	end
 	-- if(type(score) == "string") then
 		
 		

@@ -2358,6 +2358,12 @@ if(enti ~= nil) then
                 
         end
         
+        -- Custom triggers registered by other mods through cyberscript.api.registerTrigger
+        if trigger ~= nil and cyberscriptExtensions ~= nil and cyberscriptExtensions.triggers[trigger.name] ~= nil then
+                local handled, customResult = cyberscriptExtensions.runTrigger(trigger)
+                if handled then result = customResult end
+        end
+        
         if(trigger.expected ~= nil and trigger.name ~= "compare") then result = result == trigger.expected end
         if(trigger.output == true) then 
                         
@@ -2415,6 +2421,8 @@ function executeAction(action,tag,parent,index,source,executortag)
                 local hudregion = true
                 local animationregion = true
                 local airegion = true
+                
+                local isCustomAction = false
                 
                 local status, retval = pcall(function()
                         
@@ -5510,7 +5518,7 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 end
                                 
                                 if(action.name == "reset_weather") then
-                                        Game.GetWeatherSystem():ResetWeather(action.value);;
+                                        Game.GetWeatherSystem():ResetWeather(action.value)
                                 end
                                 
                                 if(action.name == "set_tweak") then
@@ -13584,6 +13592,18 @@ function executeAction(action,tag,parent,index,source,executortag)
                                 
                         end
                         
+                        
+                        -- Custom actions registered by other mods through cyberscript.api.registerAction
+                        if cyberscriptExtensions ~= nil and cyberscriptExtensions.actions[action.name] ~= nil then
+                                local handled, customResult = cyberscriptExtensions.runAction(action, {
+                                        tag = tag, parent = parent, index = index,
+                                        source = source, executortag = executortag
+                                })
+                                if handled then
+                                        isCustomAction = true
+                                        result = customResult
+                                end
+                        end
                 end)
                 
                 if status == false then
@@ -13597,6 +13617,14 @@ function executeAction(action,tag,parent,index,source,executortag)
                         
                         
                         
+                end
+                
+                if cyberscriptExtensions ~= nil and cyberscriptExtensions.hasListeners("action") then
+                        cyberscriptExtensions.emit("action", {
+                                name = action.name, tag = tag, source = source, executortag = executortag,
+                                success = status, error = (status == false) and tostring(retval) or nil,
+                                custom = isCustomAction
+                        })
                 end
                 
                 if(action.output == true) then 

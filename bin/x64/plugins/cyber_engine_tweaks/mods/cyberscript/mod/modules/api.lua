@@ -123,7 +123,64 @@ function api.getVariableKey(tag,key)
                 return nil
         end
         return result
-        
+
+end
+
+---------------------------------------------------------------------------
+-- Extension API (events, custom actions and triggers, datapack content)
+-- Check api.apiVersion before using these, so your mod still loads on older
+-- CyberScript builds that don't have them.
+---------------------------------------------------------------------------
+
+api.apiVersion = 1
+
+-- Listen to a CyberScript event. Returns an id to pass to api.off.
+--   "action"   { name, tag, source, executortag, success, error, custom }
+--   "variable" { tag, key, old, new }
+function api.on(event, callback)
+        return cyberscriptExtensions.on(event, callback)
+end
+
+function api.off(id)
+        return cyberscriptExtensions.off(id)
+end
+
+-- Add an action datapacks can use: { "name": "mymod:my_action", ... }.
+-- handler(action, ctx) gets the action's JSON fields and
+-- ctx = { tag, parent, index, source, executortag }.
+-- Return false to stop the rest of the action list; anything else continues.
+-- Names must contain ":" so they never clash with built-in actions.
+function api.registerAction(name, handler, owner)
+        return cyberscriptExtensions.registerAction(name, handler, owner)
+end
+
+function api.unregisterAction(name)
+        return cyberscriptExtensions.unregisterAction(name)
+end
+
+-- Add a trigger datapacks can use in requirements: { "name": "mymod:my_trigger", ... }.
+-- handler(trigger) gets the trigger's JSON fields and returns true or false.
+-- The usual "expected" field still works on custom triggers.
+function api.registerTrigger(name, handler, owner)
+        return cyberscriptExtensions.registerTrigger(name, handler, owner)
+end
+
+function api.unregisterTrigger(name)
+        return cyberscriptExtensions.unregisterTrigger(name)
+end
+
+-- Loaded datapack content, read only. Types include "webpage", "interfaces",
+-- "faction", "corpo", "node", "shard", "mission" and more; see api.getContentTypes().
+function api.getContentTypes()
+        return cyberscriptExtensions.getContentTypes()
+end
+
+function api.listContent(objtype)
+        return cyberscriptExtensions.listContent(objtype)
+end
+
+function api.getContent(objtype, tag)
+        return cyberscriptExtensions.getContent(objtype, tag)
 end
 
 return api

@@ -146,6 +146,7 @@ function loadModule()
 	cyberscript.sound = dofile('mod/modules/sound.lua')
 	cyberscript.location   = dofile("mod/modules/location.lua")
 	cyberscript.housing = dofile('mod/modules/housing.lua')
+	cyberscript.extensions = dofile('mod/modules/extensions.lua')
 	cyberscript.saves = dofile('mod/modules/saves.lua')
 	cyberscript.AV = dofile('mod/modules/av.lua')
 	
