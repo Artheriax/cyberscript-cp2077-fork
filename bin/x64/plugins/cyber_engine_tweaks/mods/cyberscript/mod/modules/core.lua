@@ -861,6 +861,7 @@ registerForEvent("onUpdate", function(delta)
                         inputManager.onUpdate(delta)
                         refresh(delta)
                         interactionUI.update()
+                        if cyberscript.sharedcore then cyberscript.sharedcore.update(delta) end
                 
                         end
                 

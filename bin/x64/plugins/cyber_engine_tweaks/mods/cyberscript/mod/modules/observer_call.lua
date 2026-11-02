@@ -740,13 +740,12 @@ function inputManager_init() -- Register needed observers
 
     ObserveBefore("PlayerPuppet", "OnGameAttached", function()
 		if(inputManager.inputListener == nil) then inputManager.onInit() end
-        Game.GetCallbackSystem():UnregisterCallback("Input/Key", inputManager.inputListener:Target())
-        Game.GetCallbackSystem():RegisterCallback("Input/Key", inputManager.inputListener:Target(), inputManager.inputListener:Function("OnKeyInput"))
+        inputManager.registerKeyCallback()
     end)
 
     ObserveBefore("PlayerPuppet", "OnDetach", function()
 		if(inputManager.inputListener == nil) then inputManager.onInit() end
-        Game.GetCallbackSystem():UnregisterCallback("Input/Key", inputManager.inputListener:Target())
+        inputManager.unregisterKeyCallback()
     end)
 end
 

@@ -33,6 +33,31 @@ local function handleInput(event)
     end
 end
 
+-- Game patch 2.5 added the game's own CallbackSystem, which Codeware now shares.
+-- Register the key listener defensively so an outdated or missing Codeware logs a
+-- clear message once instead of erroring every time the player attaches.
+local keyCallbackWarned = false
+
+function input.registerKeyCallback()
+    if input.inputListener == nil then return end
+    local ok, err = pcall(function()
+        local callbacks = Game.GetCallbackSystem()
+        callbacks:UnregisterCallback("Input/Key", input.inputListener:Target())
+        callbacks:RegisterCallback("Input/Key", input.inputListener:Target(), input.inputListener:Function("OnKeyInput"))
+    end)
+    if not ok and not keyCallbackWarned then
+        keyCallbackWarned = true
+        logme(1, "CyberScript: could not register keybindings (Input/Key). Check that Codeware 1.21.0 or newer is installed. Error: " .. tostring(err), true)
+    end
+end
+
+function input.unregisterKeyCallback()
+    if input.inputListener == nil then return end
+    pcall(function()
+        Game.GetCallbackSystem():UnregisterCallback("Input/Key", input.inputListener:Target())
+    end)
+end
+
 function input.onInit()
     input.listeningKeybindWidget = GameController["SettingsSelectorControllerKeyBinding"]
     input.inputListener = NewProxy({
@@ -42,9 +67,7 @@ function input.onInit()
         }
     })
 
-   
-
-    Game.GetCallbackSystem():RegisterCallback("Input/Key", input.inputListener:Target(), input.inputListener:Function("OnKeyInput"))
+    input.registerKeyCallback()
 end
 
 function input.onUpdate(deltaTime)
@@ -100,9 +123,7 @@ function input.onUpdate(deltaTime)
 end
 
 function input.onShutdown()
-    if(input.inputListener ~= nil) then
-        Game.GetCallbackSystem():UnregisterCallback("Input/Key", input.inputListener:Target())
-    end
+    input.unregisterKeyCallback()
 end
 
 --- Create an info table to be filled, or from given parameters

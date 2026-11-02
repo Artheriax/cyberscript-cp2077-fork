@@ -146,6 +146,7 @@ function loadModule()
 	cyberscript.sound = dofile('mod/modules/sound.lua')
 	cyberscript.location   = dofile("mod/modules/location.lua")
 	cyberscript.housing = dofile('mod/modules/housing.lua')
+	cyberscript.extensions = dofile('mod/modules/extensions.lua')
 	cyberscript.saves = dofile('mod/modules/saves.lua')
 	cyberscript.AV = dofile('mod/modules/av.lua')
 	
@@ -167,6 +168,11 @@ function loadModule()
 	cyberscript.scripting = dofile('mod/modules/scripting.lua')
 	cyberscript.observer = dofile('mod/modules/observer_function.lua')
 	cyberscript.ui = dofile('mod/modules/ui.lua')
+	-- the shared core (one instance for the whole session; see sharedcore/sharedcore.lua)
+	if cyberscript.sharedcore == nil then
+		cyberscript.sharedcore = dofile('mod/modules/sharedcore/sharedcore.lua').init()
+	end
+	cyberscript.sharedcore.datapack.register(cyberscriptExtensions)
 	cyberscript.api = dofile('mod/modules/api.lua')
 	cyberscript.loader = dofile('mod/modules/loader')
 
